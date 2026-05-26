@@ -10,8 +10,6 @@ use Sitegeist\ResponsiveImages\ViewHelpers\ImageViewHelper;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariant;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3Fluid\Fluid\Core\Exception;
 
 class ImageViewHelperTest extends ViewHelperTestCase
@@ -119,8 +117,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
     #[DataProvider('basicScalingCroppingDataProvider')]
     public function basicScalingCropping(string $template, string $expected, $expectedWidth, $expectedHeight): void
     {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
@@ -129,8 +126,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
         self::assertMatchesRegularExpression($expected, $result);
 
         $coreTemplate = str_replace('<sms:image', '<f:image', $template);
-        $coreView = GeneralUtility::makeInstance(StandaloneView::class);
-        $coreView->setTemplateSource('<html
+        $coreView = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             data-namespace-typo3-fluid="true"
             >' . $coreTemplate);
@@ -176,8 +172,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             new CropVariant('wide', 'Wide', new Area(0, 1 / 6, 1, 2 / 3)),
         ]);
 
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
@@ -233,8 +228,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
     #[DataProvider('tagAttributesDataProvider')]
     public function tagAttributes(string $template, string $expected): void
     {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
@@ -267,8 +261,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
     #[DataProvider('imageWithSrcsetDataProvider')]
     public function imageWithSrcset(string $template, string $expected, array $expectedDimensions): void
     {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
@@ -319,8 +312,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             new CropVariant('wide', 'Wide', new Area(0, 1 / 6, 1, 2 / 3)),
         ]);
 
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
@@ -364,8 +356,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
     #[DataProvider('fileObjectsDataProvider')]
     public function fileObjects(string $template, string $expected)
     {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"

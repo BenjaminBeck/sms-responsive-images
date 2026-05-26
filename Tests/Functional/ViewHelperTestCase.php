@@ -7,6 +7,9 @@ use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariant;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
 use TYPO3\CMS\Core\Resource\ResourceFactory;
+use TYPO3\CMS\Core\View\ViewFactoryData;
+use TYPO3\CMS\Core\View\ViewFactoryInterface;
+use TYPO3\CMS\Core\View\ViewInterface;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 abstract class ViewHelperTestCase extends FunctionalTestCase
@@ -14,6 +17,20 @@ abstract class ViewHelperTestCase extends FunctionalTestCase
     protected array $testExtensionsToLoad = [
         'typo3conf/ext/sms_responsive_images'
     ];
+
+    protected function createViewFromTemplateSource(string $templateSource): ViewInterface
+    {
+        $templateDirectory = $this->instancePath . '/typo3temp/var/tests/templates';
+        if (!is_dir($templateDirectory)) {
+            mkdir($templateDirectory, 0777, true);
+        }
+        $templatePathAndFilename = $templateDirectory . '/' . sha1($templateSource) . '.html';
+        file_put_contents($templatePathAndFilename, $templateSource);
+
+        return $this->get(ViewFactoryInterface::class)->create(
+            new ViewFactoryData(templatePathAndFilename: $templatePathAndFilename)
+        );
+    }
 
     protected function createFileObjects(): array
     {

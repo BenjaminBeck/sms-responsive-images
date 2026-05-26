@@ -7,8 +7,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Sitegeist\ResponsiveImages\Tests\Functional\ViewHelperTestCase;
 use Sitegeist\ResponsiveImages\ViewHelpers\MediaViewHelper;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Fluid\View\StandaloneView;
 use TYPO3Fluid\Fluid\Core\Exception;
 
 class MediaViewHelperTest extends ViewHelperTestCase
@@ -83,8 +81,7 @@ class MediaViewHelperTest extends ViewHelperTestCase
     {
         $fileObjects = $this->createFileObjects();
 
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
@@ -94,12 +91,11 @@ class MediaViewHelperTest extends ViewHelperTestCase
         self::assertMatchesRegularExpression($expected, $result);
 
         $coreTemplate = str_replace('<sms:media', '<f:media', $template);
-        $coreView = GeneralUtility::makeInstance(StandaloneView::class);
-        $coreView->assignMultiple($fileObjects);
-        $coreView->setTemplateSource('<html
+        $coreView = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             data-namespace-typo3-fluid="true"
             >' . $coreTemplate);
+        $coreView->assignMultiple($fileObjects);
         self::assertMatchesRegularExpression($expected, trim($coreView->render()), 'result of sms:media viewhelper does not match result of core viewhelper');
 
         $matches = [];
@@ -141,8 +137,7 @@ class MediaViewHelperTest extends ViewHelperTestCase
     #[DataProvider('tagAttributesDataProvider')]
     public function tagAttributes(string $template, string $expected): void
     {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
@@ -176,8 +171,7 @@ class MediaViewHelperTest extends ViewHelperTestCase
     #[DataProvider('imageWithSrcsetDataProvider')]
     public function imageWithSrcset(string $template, string $expected, array $expectedDimensions): void
     {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
@@ -222,8 +216,7 @@ class MediaViewHelperTest extends ViewHelperTestCase
     #[DataProvider('pictureTagDataProvider')]
     public function pictureTag(array $breakpoints, string $expected): void
     {
-        $view = GeneralUtility::makeInstance(StandaloneView::class);
-        $view->setTemplateSource('<html
+        $view = $this->createViewFromTemplateSource('<html
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
