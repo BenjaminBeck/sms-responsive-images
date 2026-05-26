@@ -98,7 +98,6 @@ class ImageViewHelperTest extends ViewHelperTestCase
             '<sms:image src="EXT:sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png" width="200" minHeight="200" />',
             '@^<img src="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png)" width="(267|200)" height="200" alt="" />$@',
             [267, 200],
-            200,
             200
         ];
         // would be 200x150, but image will be scaled down to have a height of 75

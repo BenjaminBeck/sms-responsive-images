@@ -25,10 +25,7 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
     {
         $test = $this;
 
-        $imageServiceMock = $this->getMockBuilder(ImageService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['applyProcessingInstructions', 'getImageUri'])
-            ->getMock();
+        $imageServiceMock = $this->createStub(ImageService::class);
 
         $imageServiceMock
             ->method('applyProcessingInstructions')
@@ -71,10 +68,7 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
         $properties = array_replace($defaultProperties, $properties);
 
         if ($processed) {
-            $fileMock = $this->getMockBuilder(ProcessedFile::class)
-                ->disableOriginalConstructor()
-                ->onlyMethods(['getProperty', 'getMimeType', 'getContents', 'usesOriginalFile'])
-                ->getMock();
+            $fileMock = $this->createStub(ProcessedFile::class);
 
             $fileMock
                 ->method('usesOriginalFile')
@@ -82,10 +76,7 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
                     return false;
                 });
         } else {
-            $fileMock = $this->getMockBuilder(FileReference::class)
-                ->disableOriginalConstructor()
-                ->onlyMethods(['getProperty', 'getMimeType', 'getContents'])
-                ->getMock();
+            $fileMock = $this->createStub(FileReference::class);
         }
 
         $fileMock
