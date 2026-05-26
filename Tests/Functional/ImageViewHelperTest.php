@@ -126,7 +126,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
             >' . $template);
-        $result = $view->render();
+        $result = trim($view->render());
         self::assertMatchesRegularExpression($expected, $result);
 
         $coreTemplate = str_replace('<sms:image', '<f:image', $template);
@@ -135,7 +135,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
             data-namespace-typo3-fluid="true"
             >' . $coreTemplate);
-        self::assertMatchesRegularExpression($expected, $coreView->render(), 'result of sms:image viewhelper does not match result of core viewhelper');
+        self::assertMatchesRegularExpression($expected, trim($coreView->render()), 'result of sms:image viewhelper does not match result of core viewhelper');
 
         $matches = [];
         preg_match($expected, $result, $matches);
@@ -186,7 +186,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             data-namespace-typo3-fluid="true"
             >' . $template);
         $view->assign('crop', (string) $cropVariantCollection);
-        $result = $view->render();
+        $result = trim($view->render());
         self::assertMatchesRegularExpression($expected, $result);
 
         $matches = [];
@@ -244,7 +244,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             xmlns:sms="http://typo3.org/ns/Sitegeist/ResponsiveImages/ViewHelpers"
             data-namespace-typo3-fluid="true"
             >' . $template);
-        self::assertEquals($expected, $view->render());
+        self::assertEquals($expected, trim($view->render()));
     }
 
     public static function imageWithSrcsetDataProvider(): \Generator
@@ -281,7 +281,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             data-namespace-typo3-fluid="true"
             >' . $template);
 
-        $result = $view->render();
+        $result = trim($view->render());
         self::assertMatchesRegularExpression($expected, $result);
 
         $matches = [];
@@ -338,7 +338,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             'crop' => (string) $cropVariantCollection,
             'breakpoints' => $breakpoints
         ]);
-        $result = $view->render();
+        $result = trim($view->render());
         self::assertMatchesRegularExpression($expected, $result);
     }
 
@@ -382,7 +382,7 @@ class ImageViewHelperTest extends ViewHelperTestCase
             data-namespace-typo3-fluid="true"
             >' . $template);
         $view->assignMultiple($this->createFileObjects());
-        $result = $view->render();
+        $result = trim($view->render());
         self::assertMatchesRegularExpression($expected, $result);
     }
 }

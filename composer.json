@@ -17,13 +17,13 @@
         "issues": "https://github.com/sitegeist/sms-responsive-images/issues"
     },
     "require": {
-        "typo3/cms-core": "^13.1 || ^12.2 || ^11.5 || ^10.4"
+        "typo3/cms-core": "^13.4"
     },
     "require-dev": {
-        "typo3/testing-framework": "^7.0 || ^6.0 || dev-main",
+        "typo3/testing-framework": "^9.5",
+        "phpunit/phpunit": "^11.5",
         "squizlabs/php_codesniffer": "^3.0",
-        "editorconfig-checker/editorconfig-checker": "^10.0",
-        "sbuerk/typo3-cmscomposerinstallers-testingframework-bridge": "^0.1.2"
+        "editorconfig-checker/editorconfig-checker": "^10.0"
     },
     "autoload": {
         "psr-4": {
@@ -40,8 +40,7 @@
         "bin-dir": ".Build/bin",
         "allow-plugins": {
             "typo3/class-alias-loader": true,
-            "typo3/cms-composer-installers": true,
-            "sbuerk/typo3-cmscomposerinstallers-testingframework-bridge": true
+            "typo3/cms-composer-installers": true
         }
     },
     "extra": {
@@ -69,10 +68,6 @@
             "sed -i'' -e \"s/'version' => ''/'version' => '$(echo ${GITHUB_REF#refs/tags/} | sed 's/v//')'/\" ext_emconf.php",
             "rm -r .github .ecrc .editorconfig .gitattributes Tests"
         ],
-        "render-documentation": "docker-compose -f Build/Documentation/docker-compose.yml run --rm t3docmake",
-
-        "post-autoload-dump": [
-            "TYPO3\\TestingFramework\\Composer\\ExtensionTestEnvironment::prepare"
-        ]
+        "render-documentation": "docker-compose -f Build/Documentation/docker-compose.yml run --rm t3docmake"
     }
 }
