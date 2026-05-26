@@ -416,12 +416,12 @@ class ResponsiveImagesUtility implements SingletonInterface
         }
 
         // The alt-attribute is mandatory to have valid html-code, therefore add it even if it is empty
-        $alt = $originalImage->getProperty('alternative');
-        if (!$tag->getAttribute('alt')) {
+        $alt = $originalImage->getProperty('alternative') ?? '';
+        if (!$tag->hasAttribute('alt')) {
             $tag->addAttribute('alt', $alt);
         }
         $title = $originalImage->getProperty('title');
-        if (!$tag->getAttribute('title') && $title) {
+        if (!$tag->hasAttribute('title') && $title) {
             $tag->addAttribute('title', $title);
         }
     }

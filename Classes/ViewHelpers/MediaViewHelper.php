@@ -168,14 +168,14 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             $this->tag->addAttribute('decoding', $this->arguments['decoding']);
         }
 
-        $alt = $image->getProperty('alternative');
+        $alt = $image->getProperty('alternative') ?? '';
         $title = $image->getProperty('title');
 
         // The alt-attribute is mandatory to have valid html-code, therefore add it even if it is empty
-        if (!$this->tag->getAttribute('alt')) {
+        if (!$this->tag->hasAttribute('alt')) {
             $this->tag->addAttribute('alt', $alt);
         }
-        if (!$this->tag->getAttribute('title') && $title) {
+        if (!$this->tag->hasAttribute('title') && $title) {
             $this->tag->addAttribute('title', $title);
         }
 

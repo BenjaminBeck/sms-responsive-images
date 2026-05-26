@@ -39,37 +39,37 @@ class MediaViewHelperTest extends ViewHelperTestCase
     {
         yield 'original size' => [
             '<sms:media file="{file}" />',
-            '@^<img src="(typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest\.png)" width="400" height="300" alt="" />$@',
+            '@^<img src="(###PUBLIC_IMAGE###)" width="400" height="300" alt="" />$@',
             400,
             300
         ];
         yield 'half width' => [
             '<sms:media file="{file}" width="200" />',
-            '@^<img src="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png)" width="200" height="150" alt="" />$@',
+            '@^<img src="(typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png)" width="200" height="150" alt="" />$@',
             200,
             150
         ];
         yield 'stretched' => [
             '<sms:media file="{file}" width="200" height="200" />',
-            '@^<img src="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png)" width="200" height="200" alt="" />$@',
+            '@^<img src="(typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png)" width="200" height="200" alt="" />$@',
             200,
             200
         ];
         yield 'cropped' => [
             '<sms:media file="{file}" width="200c" height="200c" />',
-            '@^<img src="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png)" width="200" height="200" alt="" />$@',
+            '@^<img src="(typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png)" width="200" height="200" alt="" />$@',
             200,
             200
         ];
         yield 'masked width' => [
             '<sms:media file="{file}" width="300m" height="300m" />',
-            '@^<img src="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png)" width="300" height="225" alt="" />$@',
+            '@^<img src="(typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png)" width="300" height="225" alt="" />$@',
             300,
             225
         ];
         yield 'masked height' => [
             '<sms:media file="{file}" width="400m" height="150m" />',
-            '@^<img src="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png)" width="200" height="150" alt="" />$@',
+            '@^<img src="(typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png)" width="200" height="150" alt="" />$@',
             200,
             150
         ];
@@ -88,7 +88,7 @@ class MediaViewHelperTest extends ViewHelperTestCase
             >' . $template);
         $view->assignMultiple($fileObjects);
         $result = trim($view->render());
-        self::assertMatchesRegularExpression($expected, $result);
+        self::assertMatchesRegularExpression(self::expandExpectedPattern($expected), $result);
 
         $coreTemplate = str_replace('<sms:media', '<f:media', $template);
         $coreView = $this->createViewFromTemplateSource('<html
@@ -96,10 +96,10 @@ class MediaViewHelperTest extends ViewHelperTestCase
             data-namespace-typo3-fluid="true"
             >' . $coreTemplate);
         $coreView->assignMultiple($fileObjects);
-        self::assertMatchesRegularExpression($expected, trim($coreView->render()), 'result of sms:media viewhelper does not match result of core viewhelper');
+        self::assertMatchesRegularExpression(self::expandExpectedPattern($expected), trim($coreView->render()), 'result of sms:media viewhelper does not match result of core viewhelper');
 
         $matches = [];
-        preg_match($expected, $result, $matches);
+        preg_match(self::expandExpectedPattern($expected), $result, $matches);
         list($width, $height) = getimagesize($this->instancePath . '/' . $matches[1]);
         self::assertEquals($expectedWidth, $width, 'width of generated image does not match expected width');
         self::assertEquals($expectedHeight, $height, 'height of generated image does not match expected height');
@@ -109,27 +109,27 @@ class MediaViewHelperTest extends ViewHelperTestCase
     {
         yield 'css' => [
             '<sms:media file="{file}" class="myClass" style="border: none" />',
-            '<img class="myClass" style="border: none" src="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png" width="400" height="300" alt="" />'
+            '<img class="myClass" style="border: none" src="###PUBLIC_IMAGE###" width="400" height="300" alt="" />'
         ];
         yield 'loading' => [
             '<sms:media file="{file}" loading="lazy" />',
-            '<img src="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png" width="400" height="300" loading="lazy" alt="" />'
+            '<img src="###PUBLIC_IMAGE###" width="400" height="300" loading="lazy" alt="" />'
         ];
         yield 'decoding' => [
             '<sms:media file="{file}" decoding="async" />',
-            '<img src="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png" width="400" height="300" decoding="async" alt="" />'
+            '<img src="###PUBLIC_IMAGE###" width="400" height="300" decoding="async" alt="" />'
         ];
         yield 'alt' => [
             '<sms:media file="{file}" alt="alternative text" />',
-            '<img alt="alternative text" src="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png" width="400" height="300" />'
+            '<img alt="alternative text" src="###PUBLIC_IMAGE###" width="400" height="300" />'
         ];
         yield 'default sizes' => [
             '<sms:media file="{file}" srcset="400w" />',
-            '<img src="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png" srcset="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png 400w" sizes="(min-width: 400px) 400px, 100vw" width="400" height="300" alt="" />',
+            '<img src="###PUBLIC_IMAGE###" srcset="###PUBLIC_IMAGE### 400w" sizes="(min-width: 400px) 400px, 100vw" width="400" height="300" alt="" />',
         ];
         yield 'sizes' => [
             '<sms:media file="{file}" srcset="400w" sizes="50vw" />',
-            '<img src="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png" srcset="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png 400w" sizes="50vw" width="400" height="300" alt="" />',
+            '<img src="###PUBLIC_IMAGE###" srcset="###PUBLIC_IMAGE### 400w" sizes="50vw" width="400" height="300" alt="" />',
         ];
     }
 
@@ -143,14 +143,14 @@ class MediaViewHelperTest extends ViewHelperTestCase
             data-namespace-typo3-fluid="true"
             >' . $template);
         $view->assignMultiple($this->createFileObjects());
-        self::assertEquals($expected, trim($view->render()));
+        self::assertMatchesRegularExpression(self::quoteExpectedTagPattern($expected), trim($view->render()));
     }
 
     public static function imageWithSrcsetDataProvider(): \Generator
     {
         yield 'hdpi variants' => [
             '<sms:media file="{file}" srcset="1x, 2x" width="100" />',
-            '@^<img src="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png)" srcset="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png) 1x, (typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png) 2x" width="100" height="75" alt="" />$@',
+            '@^<img src="(typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png)" srcset="(typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png) 1x, (typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png) 2x" width="100" height="75" alt="" />$@',
             [
                 1 => [100, 75],
                 2 => [100, 75],
@@ -159,7 +159,7 @@ class MediaViewHelperTest extends ViewHelperTestCase
         ];
         yield 'width variants' => [
             '<sms:media file="{file}" srcset="100, 200" sizes="100vw" />',
-            '@^<img src="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest\.png" srcset="(typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png) 100w, (typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png) 200w, typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest\.png 400w" sizes="100vw" width="400" height="300" alt="" />$@',
+            '@^<img src="###PUBLIC_IMAGE###" srcset="(typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png) 100w, (typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png) 200w, ###PUBLIC_IMAGE### 400w" sizes="100vw" width="400" height="300" alt="" />$@',
             [
                 1 => [100, 75],
                 2 => [200, 150]
@@ -179,10 +179,10 @@ class MediaViewHelperTest extends ViewHelperTestCase
 
         $view->assignMultiple($this->createFileObjects());
         $result = trim($view->render());
-        self::assertMatchesRegularExpression($expected, $result);
+        self::assertMatchesRegularExpression(self::expandExpectedPattern($expected), $result);
 
         $matches = [];
-        preg_match($expected, $result, $matches);
+        preg_match(self::expandExpectedPattern($expected), $result, $matches);
 
         foreach ($expectedDimensions as $match => $imageDimension) {
             list($width, $height) = getimagesize($this->instancePath . '/' . $matches[$match]);
@@ -208,7 +208,7 @@ class MediaViewHelperTest extends ViewHelperTestCase
                     'sizes' => '50vw'
                 ],
             ],
-            '@^<picture><source srcset="typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png 400w" media="\(min-width: 1000px\)" sizes="100vw" /><source srcset="typo3temp/assets/_processed_/4/5/csm_ImageViewHelperTest_.*\.png 300w" media="\(min-width: 700px\)" sizes="50vw" /><img src="typo3conf/ext/sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest\.png" width="400" alt="" /></picture>$@',
+            '@^<picture><source srcset="typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png 400w" media="\(min-width: 1000px\)" sizes="100vw" /><source srcset="typo3temp/assets/_processed_/[a-f0-9]/[a-f0-9]/csm_ImageViewHelperTest_.*\.png 300w" media="\(min-width: 700px\)" sizes="50vw" /><img src="###PUBLIC_IMAGE###" width="400" alt="" /></picture>$@',
         ];
     }
 
@@ -226,6 +226,6 @@ class MediaViewHelperTest extends ViewHelperTestCase
             'breakpoints' => $breakpoints
         ]);
         $result = trim($view->render());
-        self::assertMatchesRegularExpression($expected, $result);
+        self::assertMatchesRegularExpression(self::expandExpectedPattern($expected), $result);
     }
 }

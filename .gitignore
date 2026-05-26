@@ -2,4 +2,5 @@
 Build/Testing/.phpunit.cache/
 composer.lock
 Documentation-GENERATED-temp
+packages/
 var/

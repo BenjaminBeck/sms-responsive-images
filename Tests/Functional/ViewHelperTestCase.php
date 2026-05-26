@@ -14,6 +14,8 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 abstract class ViewHelperTestCase extends FunctionalTestCase
 {
+    private const PUBLIC_IMAGE_PATTERN = '(?:typo3conf/ext/sms_responsive_images/Resources/Public|_assets/[a-f0-9]+)/Tests/Functional/Fixtures/ImageViewHelperTest\.png';
+
     protected array $testExtensionsToLoad = [
         'typo3conf/ext/sms_responsive_images'
     ];
@@ -32,6 +34,20 @@ abstract class ViewHelperTestCase extends FunctionalTestCase
         );
     }
 
+    protected static function expandExpectedPattern(string $expected): string
+    {
+        return str_replace('###PUBLIC_IMAGE###', self::PUBLIC_IMAGE_PATTERN, $expected);
+    }
+
+    protected static function quoteExpectedTagPattern(string $expected): string
+    {
+        return '@^' . str_replace(
+            '\#\#\#PUBLIC_IMAGE\#\#\#',
+            self::PUBLIC_IMAGE_PATTERN,
+            preg_quote($expected, '@')
+        ) . '$@';
+    }
+
     protected function createFileObjects(): array
     {
         $variables = [];
@@ -39,7 +55,7 @@ abstract class ViewHelperTestCase extends FunctionalTestCase
 
         // Create file record from existing test file
         $variables['file'] = $resourceFactory->retrieveFileOrFolderObject(
-            'EXT:sms_responsive_images/Tests/Functional/Fixtures/ImageViewHelperTest.png'
+            'EXT:sms_responsive_images/Resources/Public/Tests/Functional/Fixtures/ImageViewHelperTest.png'
         );
 
         // Create file reference with cropping information
