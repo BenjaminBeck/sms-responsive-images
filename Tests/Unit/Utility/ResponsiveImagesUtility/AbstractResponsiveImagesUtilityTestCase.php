@@ -32,7 +32,7 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
 
         $imageServiceMock
             ->method('applyProcessingInstructions')
-            ->will($this->returnCallback(function ($file, $instructions) use ($test) {
+            ->willReturnCallback(function ($file, $instructions) use ($test) {
                 // Simulate processor_allowUpscaling = false
                 $instructions['width'] = isset($instructions['width'])
                     ? min($instructions['width'], $file->getProperty('width'))
@@ -51,14 +51,14 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
                 }
 
                 return $test->mockFileObject($instructions, true);
-            }));
+            });
 
         $imageServiceMock
             ->method('getImageUri')
-            ->will($this->returnCallback(function ($file, $absolute) {
+            ->willReturnCallback(function ($file, $absolute) {
                 return (($absolute) ? 'http://domain.tld' : '') . '/' . $file->getProperty('name') . '-' . $file->getProperty('width')
                     . '.' . $file->getProperty('extension');
-            }));
+            });
 
         return $imageServiceMock;
     }
@@ -78,9 +78,9 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
 
             $fileMock
                 ->method('usesOriginalFile')
-                ->will($this->returnCallback(function () use ($properties) {
+                ->willReturnCallback(function () use ($properties) {
                     return false;
-                }));
+                });
         } else {
             $fileMock = $this->getMockBuilder(FileReference::class)
                 ->disableOriginalConstructor()
@@ -90,19 +90,19 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
 
         $fileMock
             ->method('getProperty')
-            ->will($this->returnCallback(function ($property) use ($properties) {
+            ->willReturnCallback(function ($property) use ($properties) {
                 return $properties[$property] ?? null;
-            }));
+            });
         $fileMock
             ->method('getMimeType')
-            ->will($this->returnCallback(function () use ($properties) {
+            ->willReturnCallback(function () use ($properties) {
                 return $properties['mimeType'];
-            }));
+            });
         $fileMock
             ->method('getContents')
-            ->will($this->returnCallback(function () use ($properties) {
+            ->willReturnCallback(function () use ($properties) {
                 return 'das-ist-der-dateiinhalt';
-            }));
+            });
 
         return $fileMock;
     }

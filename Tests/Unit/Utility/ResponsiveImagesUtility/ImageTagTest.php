@@ -2,6 +2,8 @@
 
 namespace Sitegeist\ResponsiveImages\Tests\Unit\Utility\ResponsiveImagesUtility;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use TYPO3Fluid\Fluid\Core\ViewHelper\TagBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 
@@ -196,10 +198,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createSimpleImageTagProvider
-     */
+    #[Test]
+    #[DataProvider('createSimpleImageTagProvider')]
     public function createSimpleImageTag(
         $originalImage,
         $fallbackImage,
@@ -258,10 +258,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createImageTagWithSrcsetUsingEmptySrcsetProvider
-     */
+    #[Test]
+    #[DataProvider('createImageTagWithSrcsetUsingEmptySrcsetProvider')]
     public function createImageTagWithSrcsetUsingEmptySrcset(
         $originalImage,
         $fallbackImage,
@@ -329,10 +327,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createImageTagWithSrcsetProvider
-     */
+    #[Test]
+    #[DataProvider('createImageTagWithSrcsetProvider')]
     public function createImageTagWithSrcset(
         $originalImage,
         $fallbackImage,
@@ -364,10 +360,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createImageTagWithSrcsetAndFocusAreaProvider
-     */
+    #[Test]
+    #[DataProvider('createImageTagWithSrcsetAndFocusAreaProvider')]
     public function createImageTagWithSrcsetAndFocusArea(
         $originalImage,
         $fallbackImage,
@@ -412,10 +406,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createImageTagWithSrcsetAndSizesProvider
-     */
+    #[Test]
+    #[DataProvider('createImageTagWithSrcsetAndSizesProvider')]
     public function createImageTagWithSrcsetAndSizes(
         $originalImage,
         $fallbackImage,
@@ -457,10 +449,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createImageTagWithSrcsetAndMetadataProvider
-     */
+    #[Test]
+    #[DataProvider('createImageTagWithSrcsetAndMetadataProvider')]
     public function createImageTagWithSrcsetAndMetadata($originalImage, $fallbackImage, $altAttribute, $titleAttribute)
     {
         $originalImage = $this->mockFileObject($originalImage);
@@ -497,10 +487,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createImageTagWithSrcsetBasedOnCustomTagProvider
-     */
+    #[Test]
+    #[DataProvider('createImageTagWithSrcsetBasedOnCustomTagProvider')]
     public function createImageTagWithSrcsetBasedOnCustomTag(
         $originalImage,
         $fallbackImage,
@@ -590,10 +578,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createImageTagWithSrcsetAndLazyloadProvider
-     */
+    #[Test]
+    #[DataProvider('createImageTagWithSrcsetAndLazyloadProvider')]
     public function createImageTagWithSrcsetAndLazyload(
         $originalImage,
         $fallbackImage,
@@ -719,10 +705,8 @@ class ImageTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createImageTagWithSrcsetAndCustomFileExtensionProvider
-     */
+    #[Test]
+    #[DataProvider('createImageTagWithSrcsetAndCustomFileExtensionProvider')]
     public function createImageTagWithSrcsetAndCustomFileExtension(
         $originalImage,
         $fallbackImage,

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Sitegeist\ResponsiveImages\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Sitegeist\ResponsiveImages\Tests\Functional\ViewHelperTestCase;
 use Sitegeist\ResponsiveImages\ViewHelpers\MediaViewHelper;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -11,9 +13,7 @@ use TYPO3Fluid\Fluid\Core\Exception;
 
 class MediaViewHelperTest extends ViewHelperTestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function renderThrowsExceptionOnInvalidObject(): void
     {
         $this->expectException(\UnexpectedValueException::class);
@@ -24,9 +24,7 @@ class MediaViewHelperTest extends ViewHelperTestCase
         $viewHelper->render();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function renderThrowsExceptionOnInvalidFileExtension(): void
     {
         $this->expectException(Exception::class);
@@ -79,10 +77,8 @@ class MediaViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider basicScalingCroppingDataProvider
-     */
+    #[Test]
+    #[DataProvider('basicScalingCroppingDataProvider')]
     public function basicScalingCropping(string $template, string $expected, int $expectedWidth, int $expectedHeight): void
     {
         $fileObjects = $this->createFileObjects();
@@ -141,10 +137,8 @@ class MediaViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider tagAttributesDataProvider
-     */
+    #[Test]
+    #[DataProvider('tagAttributesDataProvider')]
     public function tagAttributes(string $template, string $expected): void
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
@@ -178,10 +172,8 @@ class MediaViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider imageWithSrcsetDataProvider
-     */
+    #[Test]
+    #[DataProvider('imageWithSrcsetDataProvider')]
     public function imageWithSrcset(string $template, string $expected, array $expectedDimensions): void
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
@@ -226,10 +218,8 @@ class MediaViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider pictureTagDataProvider
-     */
+    #[Test]
+    #[DataProvider('pictureTagDataProvider')]
     public function pictureTag(array $breakpoints, string $expected): void
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);

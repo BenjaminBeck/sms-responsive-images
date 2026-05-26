@@ -2,6 +2,8 @@
 
 namespace Sitegeist\ResponsiveImages\Tests\Unit\Utility\ResponsiveImagesUtility;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 class PictureSourceTagTest extends AbstractResponsiveImagesUtilityTestCase
 {
     public static function createPictureSourceTagProvider()
@@ -82,10 +84,8 @@ class PictureSourceTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createPictureSourceTagProvider
-     */
+    #[Test]
+    #[DataProvider('createPictureSourceTagProvider')]
     public function createPictureSourceTag(
         $image,
         $defaultWidth,

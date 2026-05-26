@@ -2,6 +2,8 @@
 
 namespace Sitegeist\ResponsiveImages\Tests\Unit\Utility\ResponsiveImagesUtility;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use TYPO3Fluid\Fluid\Core\ViewHelper\TagBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 
@@ -48,10 +50,8 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider addMetadataToImageTagWithFocusAreaProvider
-     */
+    #[Test]
+    #[DataProvider('addMetadataToImageTagWithFocusAreaProvider')]
     public function addMetadataToImageTagWithFocusArea($tag, $originalImage, $fallbackImage, $focusArea, $dataAttribute)
     {
         $originalImage = $this->mockFileObject($originalImage);
@@ -98,10 +98,8 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider addMetadataToImageTagWithAltAndTitleProvider
-     */
+    #[Test]
+    #[DataProvider('addMetadataToImageTagWithAltAndTitleProvider')]
     public function addMetadataToImageTagWithAltAndTitle(
         $tag,
         $originalImage,
@@ -199,10 +197,8 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider generatesSrcsetImagesProvider
-     */
+    #[Test]
+    #[DataProvider('generatesSrcsetImagesProvider')]
     public function generatesSrcsetImages($originalImage, $width, $srcsetConfig, $cropArea, $absoluteUri, $output)
     {
         $originalImage = $this->mockFileObject($originalImage);
@@ -249,10 +245,8 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider generatePlaceholderImageProvider
-     */
+    #[Test]
+    #[DataProvider('generatePlaceholderImageProvider')]
     public function generatePlaceholderImage($originalImage, $width, $cropArea, $inline, $absoluteUri, $output)
     {
         $originalImage = $this->mockFileObject($originalImage);
@@ -298,10 +292,8 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider generateSrcsetAttributeProvider
-     */
+    #[Test]
+    #[DataProvider('generateSrcsetAttributeProvider')]
     public function generateSrcsetAttribute($input, $output)
     {
         $this->assertEquals($output, $this->utility->generateSrcsetAttribute($input));
@@ -390,10 +382,8 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider normalizeImageBreakpointsProvider
-     */
+    #[Test]
+    #[DataProvider('normalizeImageBreakpointsProvider')]
     public function normalizeImageBreakpoints($input, $output)
     {
         $this->assertEquals($output, $this->utility->normalizeImageBreakpoints($input));

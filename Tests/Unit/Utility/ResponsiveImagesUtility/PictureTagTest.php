@@ -2,6 +2,8 @@
 
 namespace Sitegeist\ResponsiveImages\Tests\Unit\Utility\ResponsiveImagesUtility;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use TYPO3Fluid\Fluid\Core\ViewHelper\TagBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
@@ -182,10 +184,8 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createPictureTagProvider
-     */
+    #[Test]
+    #[DataProvider('createPictureTagProvider')]
     public function createPictureTag(
         $originalImage,
         $fallbackImage,
@@ -237,10 +237,8 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createPictureTagWithCustomTagProvider
-     */
+    #[Test]
+    #[DataProvider('createPictureTagWithCustomTagProvider')]
     public function createPictureTagWithCustomTag(
         $originalImage,
         $fallbackImage,
@@ -294,10 +292,8 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createPictureTagWithCustomFallbackTagProvider
-     */
+    #[Test]
+    #[DataProvider('createPictureTagWithCustomFallbackTagProvider')]
     public function createPictureTagWithCustomFallbackTag(
         $originalImage,
         $fallbackImage,
@@ -339,10 +335,8 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createPictureTagFromSvgProvider
-     */
+    #[Test]
+    #[DataProvider('createPictureTagFromSvgProvider')]
     public function createPictureTagFromSvg($originalImage, $fallbackImage, $tagName, $srcAttribute, $srcsetAttribute, $heightAttribute, $widthAttribute)
     {
         $originalImage = $this->mockFileObject($originalImage);
@@ -477,10 +471,8 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider createPictureTagWithCustomFileExtensionProvider
-     */
+    #[Test]
+    #[DataProvider('createPictureTagWithCustomFileExtensionProvider')]
     public function createPictureTagWithCustomFileExtension(
         $originalImage,
         $fallbackImage,

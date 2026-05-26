@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Sitegeist\ResponsiveImages\Tests\Functional;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Sitegeist\ResponsiveImages\Tests\Functional\ViewHelperTestCase;
 use Sitegeist\ResponsiveImages\ViewHelpers\ImageViewHelper;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
@@ -25,10 +27,8 @@ class ImageViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider invalidArgumentsDataProvider
-     */
+    #[Test]
+    #[DataProvider('invalidArgumentsDataProvider')]
     public function renderThrowsExceptionOnInvalidArguments(array $arguments, int $expectedExceptionCode): void
     {
         $this->expectException(Exception::class);
@@ -115,9 +115,9 @@ class ImageViewHelperTest extends ViewHelperTestCase
      * @param int|int[] $expectedWidth
      * @param int|int[] $expectedHeight
      *
-     * @test
-     * @dataProvider basicScalingCroppingDataProvider
      */
+    #[Test]
+    #[DataProvider('basicScalingCroppingDataProvider')]
     public function basicScalingCropping(string $template, string $expected, $expectedWidth, $expectedHeight): void
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
@@ -166,10 +166,8 @@ class ImageViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider cropVariantCollectionDataProvider
-     */
+    #[Test]
+    #[DataProvider('cropVariantCollectionDataProvider')]
     public function cropVariantCollection(string $template, string $expected, int $expectedWidth, int $expectedHeight): void
     {
         // Based on 400x300 dimensions
@@ -232,10 +230,8 @@ class ImageViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider tagAttributesDataProvider
-     */
+    #[Test]
+    #[DataProvider('tagAttributesDataProvider')]
     public function tagAttributes(string $template, string $expected): void
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
@@ -268,10 +264,8 @@ class ImageViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider imageWithSrcsetDataProvider
-     */
+    #[Test]
+    #[DataProvider('imageWithSrcsetDataProvider')]
     public function imageWithSrcset(string $template, string $expected, array $expectedDimensions): void
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
@@ -315,10 +309,8 @@ class ImageViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider pictureTagDataProvider
-     */
+    #[Test]
+    #[DataProvider('pictureTagDataProvider')]
     public function pictureTag(array $breakpoints, string $expected): void
     {
         // Based on 400x300 dimensions
@@ -369,10 +361,8 @@ class ImageViewHelperTest extends ViewHelperTestCase
         ];
     }
 
-    /**
-     * @test
-     * @dataProvider fileObjectsDataProvider
-     */
+    #[Test]
+    #[DataProvider('fileObjectsDataProvider')]
     public function fileObjects(string $template, string $expected)
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
