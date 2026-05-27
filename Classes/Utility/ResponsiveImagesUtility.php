@@ -434,6 +434,7 @@ class ResponsiveImagesUtility implements SingletonInterface
      *   2: $srcset = ['200w', '400w']
      *   3: $srcset = ['1x', '2x']
      *   4: $srcset = '200, 400'
+     *   5: $srcset = 400
      *
      * Output:
      *   1+2+4: ['200w' => 'path/to/image@200w.jpg', '400w' => 'path/to/image@200w.jpg']
@@ -441,7 +442,7 @@ class ResponsiveImagesUtility implements SingletonInterface
      *
      * @param  FileInterface  $image
      * @param  int            $defaultWidth
-     * @param  array|string   $srcset
+     * @param  array|string|int   $srcset
      * @param  Area           $cropArea
      * @param  bool           $absoluteUri
      *
@@ -459,7 +460,7 @@ class ResponsiveImagesUtility implements SingletonInterface
 
         // Convert srcset input to array
         if (!is_array($srcset)) {
-            $srcset = GeneralUtility::trimExplode(',', $srcset);
+            $srcset = GeneralUtility::trimExplode(',', (string) $srcset);
         }
 
         $images = [];

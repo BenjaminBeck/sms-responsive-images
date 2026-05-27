@@ -171,6 +171,17 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
                     '600w' => 'http://domain.tld/image-600.jpg'
                 ]
             ],
+            // Test srcset input as integer
+            'usingSrcsetInteger' => [
+                ['width' => 1000, 'extension' => 'jpg'],
+                400,
+                575,
+                null,
+                false,
+                [
+                    '575w' => '/image-575.jpg',
+                ]
+            ],
             'usingTooSmallImage' => [
                 ['width' => 400, 'extension' => 'jpg'],
                 400,
