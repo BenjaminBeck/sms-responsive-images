@@ -76,6 +76,20 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             false,
             'svg, gif'
         );
+        $this->registerArgument(
+            'sourceQuality',
+            'int',
+            'ImageMagick quality for source candidates.',
+            false,
+            null
+        );
+        $this->registerArgument(
+            'lqipQuality',
+            'int',
+            'ImageMagick quality for low quality image placeholders.',
+            false,
+            null
+        );
     }
 
     /**
@@ -226,7 +240,12 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             $this->arguments['ignoreFileExtensions'],
             (int) $this->arguments['placeholderSize'],
             $this->arguments['placeholderInline'],
-            $fileExtension
+            $fileExtension,
+            $cropVariant,
+            false,
+            $this->arguments['sourceQuality'],
+            false,
+            $this->arguments['lqipQuality']
         );
 
         return $this->tag->render();
@@ -276,7 +295,9 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             $this->arguments['ignoreFileExtensions'],
             (int) $this->arguments['placeholderSize'],
             $this->arguments['placeholderInline'],
-            $fileExtension
+            $fileExtension,
+            $this->arguments['sourceQuality'],
+            $this->arguments['lqipQuality']
         );
 
         return $this->tag->render();

@@ -10,7 +10,9 @@ use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3Fluid\Fluid\Core\ViewHelper\TagBuilder;
 use TYPO3\CMS\Extbase\Service\ImageService;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MathUtility;
 
 class ResponsiveImagesUtility implements SingletonInterface
 {
@@ -72,7 +74,9 @@ class ResponsiveImagesUtility implements SingletonInterface
         $ignoreFileExtensions = 'svg, gif',
         int $placeholderSize = 0,
         bool $placeholderInline = false,
-        ?string $fileExtension = null
+        ?string $fileExtension = null,
+        ?int $sourceQuality = null,
+        ?int $lqipQuality = null
     ): TagBuilder {
         $tag = $tag ?: GeneralUtility::makeInstance(TagBuilder::class, 'img');
 
@@ -87,7 +91,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $lazyload,
                 $placeholderSize,
                 $placeholderInline,
-                $fileExtension
+                $fileExtension,
+                $lqipQuality
             );
         }
 
@@ -111,7 +116,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $cropArea,
                 $placeholderInline,
                 $absoluteUri,
-                $fileExtension
+                $fileExtension,
+                $lqipQuality
             ));
         }
 
@@ -122,13 +128,16 @@ class ResponsiveImagesUtility implements SingletonInterface
         }
 
         // Generate different image sizes for srcset attribute
+        $unusedDimensions = null;
         $srcsetImages = $this->generateSrcsetImages(
             $originalImage,
             $referenceWidth,
             $srcset,
             $cropArea,
             $absoluteUri,
-            $fileExtension
+            $fileExtension,
+            $unusedDimensions,
+            $sourceQuality
         );
         $srcsetMode = substr(key($srcsetImages) ?? 'w', -1); // x or w
 
@@ -185,13 +194,25 @@ class ResponsiveImagesUtility implements SingletonInterface
         $ignoreFileExtensions = 'svg, gif',
         int $placeholderSize = 0,
         bool $placeholderInline = false,
-        ?string $fileExtension = null
+        ?string $fileExtension = null,
+        string $cropVariant = 'default',
+        bool $addJpgFallbackSource = false,
+        ?int $sourceQuality = null,
+        bool $addLqip = false,
+        ?int $lqipQuality = null
     ): TagBuilder {
         $tag = $tag ?: GeneralUtility::makeInstance(TagBuilder::class, 'picture');
         $fallbackTag = $fallbackTag ?: GeneralUtility::makeInstance(TagBuilder::class, 'img');
 
         // Deal with file formats that can't be cropped separately
-        if ($this->hasIgnoredFileExtension($originalImage, $ignoreFileExtensions, $fileExtension)) {
+        if ($this->hasIgnoredFileExtension($originalImage, $ignoreFileExtensions, null)
+            || $this->hasIgnoredFileExtension($originalImage, $ignoreFileExtensions, $fileExtension)
+        ) {
+            $existingClass = trim((string)$fallbackTag->getAttribute('class'));
+            if (!GeneralUtility::inList(str_replace(' ', ',', $existingClass), 'picture')) {
+                $fallbackTag->addAttribute('class', trim($existingClass . ' picture'));
+            }
+
             return $this->createSimpleImageTag(
                 $originalImage,
                 $fallbackImage,
@@ -201,7 +222,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $lazyload,
                 $placeholderSize,
                 $placeholderInline,
-                $fileExtension
+                $this->hasIgnoredFileExtension($originalImage, $ignoreFileExtensions, null) ? null : $fileExtension,
+                $lqipQuality
             );
         }
 
@@ -210,6 +232,20 @@ class ResponsiveImagesUtility implements SingletonInterface
 
         // Use width of fallback image as reference for relative sizes (1x, 2x...)
         $referenceWidth = $fallbackImage->getProperty('width');
+
+        $jpgFallbackImage = null;
+        if ($addJpgFallbackSource) {
+            $jpgFallbackImage = $this->isJpegImage($fallbackImage)
+                ? $fallbackImage
+                : $this->createJpgFallbackImage(
+                    $originalImage,
+                    (int)$referenceWidth,
+                    $cropVariantCollection->getCropArea($cropVariant),
+                    $sourceQuality
+                );
+            $fallbackImage = $jpgFallbackImage;
+            $referenceWidth = $fallbackImage->getProperty('width');
+        }
 
         // if lazyload enabled add data- prefix
         $attributePrefix = $lazyload ? 'data-' : '';
@@ -232,8 +268,24 @@ class ResponsiveImagesUtility implements SingletonInterface
                 null,
                 $placeholderInline,
                 $absoluteUri,
-                $fileExtension
+                $fileExtension,
+                $lqipQuality
             ));
+        }
+
+        if ($addLqip && $placeholderInline && $placeholderSize) {
+            $this->addLqipBackgroundToPictureTag(
+                $tag,
+                $this->generatePlaceholderImage(
+                    $originalImage,
+                    $placeholderSize,
+                    $cropVariantCollection->getCropArea($cropVariant),
+                    true,
+                    $absoluteUri,
+                    $fileExtension,
+                    $lqipQuality
+                )
+            );
         }
 
         // Provide image width to be consistent with TYPO3 core behavior
@@ -255,9 +307,43 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $cropArea,
                 $absoluteUri,
                 $lazyload,
-                $fileExtension
+                $fileExtension,
+                $sourceQuality
             );
+
+            $srcsetAttributeName = $sourceTag->hasAttribute('data-srcset') ? 'data-srcset' : 'srcset';
+            $sourceMimeType = $this->getMimeTypeFromSrcset((string)$sourceTag->getAttribute($srcsetAttributeName));
+            if ($sourceMimeType && ($sourceQuality !== null || $addJpgFallbackSource || $addLqip)) {
+                $sourceTag->addAttribute('type', $sourceMimeType);
+
+                if ($sourceMimeType !== 'image/webp' && ExtensionManagementUtility::isLoaded('webp')) {
+                    $sourceTagWebP = clone $sourceTag;
+                    foreach (['srcset', 'data-srcset'] as $attributeName) {
+                        $attribute = (string)$sourceTagWebP->getAttribute($attributeName);
+                        if ($attribute !== '') {
+                            $sourceTagWebP->addAttribute($attributeName, $this->appendWebpExtensionToImageUrls($attribute));
+                        }
+                    }
+                    $sourceTagWebP->addAttribute('type', 'image/webp');
+                    $sourceTags[] = $sourceTagWebP->render();
+                }
+            }
             $sourceTags[] = $sourceTag->render();
+        }
+
+        if ($addJpgFallbackSource) {
+            $sourceTags[] = $this->createJpgFallbackSourceTag(
+                $originalImage,
+                (int)$referenceWidth,
+                $cropVariantCollection->getCropArea($cropVariant),
+                $absoluteUri,
+                $sourceQuality,
+                $jpgFallbackImage
+            )->render();
+        }
+
+        if ($addJpgFallbackSource || $addLqip) {
+            $fallbackTag->addAttribute('data-sizes', 'auto');
         }
 
         // Fill picture tag
@@ -266,6 +352,85 @@ class ResponsiveImagesUtility implements SingletonInterface
         );
 
         return $tag;
+    }
+
+    protected function addLqipBackgroundToPictureTag(TagBuilder $tag, string $placeholderUri): void
+    {
+        $style = trim((string)$tag->getAttribute('style'));
+        $separator = $style !== '' && substr($style, -1) !== ';' ? '; ' : '';
+        $tag->addAttribute('style', $style . $separator . '--lqip: url("' . $placeholderUri . '");');
+
+        $existingClass = trim((string)$tag->getAttribute('class'));
+        if (!GeneralUtility::inList(str_replace(' ', ',', $existingClass), 'has-lqip')) {
+            $tag->addAttribute('class', trim($existingClass . ' has-lqip'));
+        }
+    }
+
+    protected function getMimeTypeFromSrcset(string $srcset): ?string
+    {
+        if (preg_match('/\.(jpe?g|png|webp)\b/i', $srcset, $matches) !== 1) {
+            return null;
+        }
+
+        return match (strtolower($matches[1])) {
+            'png' => 'image/png',
+            'webp' => 'image/webp',
+            default => 'image/jpeg',
+        };
+    }
+
+    protected function appendWebpExtensionToImageUrls(string $attribute): string
+    {
+        return (string)preg_replace('/\.(jpe?g|png)\b/i', '.$1.webp', $attribute);
+    }
+
+    protected function createJpgFallbackImage(
+        FileInterface $originalImage,
+        int $width,
+        Area $cropArea,
+        ?int $quality = null
+    ): FileInterface {
+        $processingInstructions = [
+            'width' => $width,
+            'crop' => $cropArea->isEmpty() ? null : $cropArea->makeAbsoluteBasedOnFile($originalImage),
+            'fileExtension' => 'jpg',
+        ];
+        $this->addQualityToProcessingInstructions($processingInstructions, $quality);
+
+        return $this->imageService->applyProcessingInstructions($originalImage, $processingInstructions);
+    }
+
+    protected function isJpegImage(FileInterface $image): bool
+    {
+        $extension = strtolower((string)$image->getProperty('extension'));
+        if (in_array($extension, ['jpg', 'jpeg'], true)) {
+            return true;
+        }
+
+        return strtolower((string)$image->getMimeType()) === 'image/jpeg';
+    }
+
+    protected function createJpgFallbackSourceTag(
+        FileInterface $originalImage,
+        int $width,
+        Area $cropArea,
+        bool $absoluteUri = false,
+        ?int $quality = null,
+        ?FileInterface $processedImage = null
+    ): TagBuilder {
+        $processedImage = $processedImage ?: $this->createJpgFallbackImage($originalImage, $width, $cropArea, $quality);
+
+        $sourceTag = GeneralUtility::makeInstance(TagBuilder::class, 'source');
+        $sourceTag->addAttribute('srcset', $this->imageService->getImageUri($processedImage, $absoluteUri));
+        $sourceTag->addAttribute('type', 'image/jpeg');
+        if ($processedImage->getProperty('width') !== null) {
+            $sourceTag->addAttribute('width', $processedImage->getProperty('width'));
+        }
+        if ($processedImage->getProperty('height') !== null) {
+            $sourceTag->addAttribute('height', $processedImage->getProperty('height'));
+        }
+
+        return $sourceTag;
     }
 
     /**
@@ -291,7 +456,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         ?Area $cropArea = null,
         bool $absoluteUri = false,
         bool $lazyload = false,
-        ?string $fileExtension = null
+        ?string $fileExtension = null,
+        ?int $sourceQuality = null
     ): TagBuilder {
         $cropArea = $cropArea ?: Area::createEmpty();
 
@@ -299,13 +465,16 @@ class ResponsiveImagesUtility implements SingletonInterface
         $attributePrefix = $lazyload ? 'data-' : '';
 
         // Generate different image sizes for srcset attribute
+        $largestDimensions = [];
         $srcsetImages = $this->generateSrcsetImages(
             $originalImage,
             $defaultWidth,
             $srcset,
             $cropArea,
             $absoluteUri,
-            $fileExtension
+            $fileExtension,
+            $largestDimensions,
+            $sourceQuality
         );
         $srcsetMode = substr(key($srcsetImages) ?? 'w', -1); // x or w
 
@@ -345,7 +514,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         bool $lazyload = false,
         int $placeholderSize = 0,
         bool $placeholderInline = false,
-        ?string $fileExtension = null
+        ?string $fileExtension = null,
+        ?int $lqipQuality = null
     ): TagBuilder {
         $tag = $tag ?: GeneralUtility::makeInstance(TagBuilder::class, 'img');
         $fallbackImage = ($fallbackImage) ?: $originalImage;
@@ -378,7 +548,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 null,
                 $placeholderInline,
                 $absoluteUri,
-                $fileExtension
+                $fileExtension,
+                $lqipQuality
             ));
         }
 
@@ -454,7 +625,9 @@ class ResponsiveImagesUtility implements SingletonInterface
         $srcset,
         ?Area $cropArea = null,
         bool $absoluteUri = false,
-        ?string $fileExtension = null
+        ?string $fileExtension = null,
+        &$largestDimensions = null,
+        ?int $quality = null
     ): array {
         $cropArea = $cropArea ?: Area::createEmpty();
 
@@ -491,19 +664,39 @@ class ResponsiveImagesUtility implements SingletonInterface
             if (!empty($fileExtension)) {
                 $processingInstructions['fileExtension'] = $fileExtension;
             }
+            $this->addQualityToProcessingInstructions($processingInstructions, $quality);
             $processedImage = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
 
             // If processed file isn't as wide as it should be ([GFX][processor_allowUpscaling] set to false)
             // then use final width of the image as widthDescriptor if not input case 3 is used
             $processedWidth = $processedImage->getProperty('width');
+            $processedHeight = $processedImage->getProperty('height');
             if ($srcsetMode === 'w' && $processedWidth !== $candidateWidth) {
                 $widthDescriptor = $processedWidth . 'w';
+            }
+            if (is_array($largestDimensions) && (empty($largestDimensions['width']) || $processedWidth > $largestDimensions['width'])) {
+                $largestDimensions = [
+                    'width' => $processedWidth,
+                    'height' => $processedHeight,
+                ];
             }
 
             $images[$widthDescriptor] = $this->imageService->getImageUri($processedImage, $absoluteUri);
         }
 
         return $images;
+    }
+
+    public function addQualityToProcessingInstructions(array &$processingInstructions, ?int $quality = null): void
+    {
+        if ($quality === null) {
+            return;
+        }
+
+        $quality = MathUtility::forceIntegerInRange($quality, 1, 100);
+        $processingInstructions['additionalParameters'] = trim(
+            ($processingInstructions['additionalParameters'] ?? '') . ' -quality ' . $quality
+        );
     }
 
     /**
@@ -523,7 +716,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         ?Area $cropArea = null,
         bool $inline = false,
         bool $absoluteUri = false,
-        ?string $fileExtension = null
+        ?string $fileExtension = null,
+        ?int $quality = null
     ): string {
         $cropArea = $cropArea ?: Area::createEmpty();
 
@@ -534,6 +728,7 @@ class ResponsiveImagesUtility implements SingletonInterface
         if (!empty($fileExtension)) {
             $processingInstructions['fileExtension'] = $fileExtension;
         }
+        $this->addQualityToProcessingInstructions($processingInstructions, $quality);
         $processedImage = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
 
         // Disable inline placeholder if the image is not processed at all
@@ -635,9 +830,9 @@ class ResponsiveImagesUtility implements SingletonInterface
             : GeneralUtility::trimExplode(',', $ignoreFileExtensions);
 
         if (!empty($fileExtension)) {
-            return in_array($fileExtension, $ignoreFileExtensions);
-        } else {
-            return in_array($image->getProperty('extension'), $ignoreFileExtensions);
+            return in_array($fileExtension, $ignoreFileExtensions, true);
         }
+
+        return in_array($image->getProperty('extension'), $ignoreFileExtensions, true);
     }
 }

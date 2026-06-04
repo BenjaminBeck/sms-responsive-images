@@ -562,7 +562,7 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
 
         $this->assertSame('picture', $tag->getTagName());
         $this->assertSame('has-lqip', $tag->getAttribute('class'));
-        $this->assertSame('--lqip: url("data:image/webp;base64,ZGFzLWlzdC1kZXItZGF0ZWlpbmhhbHQ=");', $tag->getAttribute('style'));
+        $this->assertSame('--lqip: url(&quot;data:image/webp;base64,ZGFzLWlzdC1kZXItZGF0ZWlpbmhhbHQ=&quot;);', $tag->getAttribute('style'));
         $this->assertSame(
             '<source srcset="/image-500-q50.webp 500w, /image-1000-q50.webp 1000w" media="(min-width: 768px)" sizes="auto" type="image/webp" />'
             . '<source srcset="/image-235-q50.webp 235w, /image-470-q50.webp 470w" sizes="auto, 50vw" type="image/webp" />'

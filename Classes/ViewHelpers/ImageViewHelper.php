@@ -80,6 +80,41 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
             false,
             'svg, gif'
         );
+        $this->registerArgument(
+            'addJpgFallbackSource',
+            'bool',
+            'Add a plain JPEG source with the same dimensions as the fallback image.',
+            false,
+            false
+        );
+        $this->registerArgument(
+            'addLqip',
+            'bool',
+            'Add an inline low quality image placeholder as background on the picture tag.',
+            false,
+            false
+        );
+        $this->registerArgument(
+            'imgQuality',
+            'int',
+            'ImageMagick quality for the fallback img.',
+            false,
+            null
+        );
+        $this->registerArgument(
+            'sourceQuality',
+            'int',
+            'ImageMagick quality for source candidates.',
+            false,
+            null
+        );
+        $this->registerArgument(
+            'lqipQuality',
+            'int',
+            'ImageMagick quality for low quality image placeholders.',
+            false,
+            null
+        );
     }
 
     /**
@@ -143,9 +178,21 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                 'width' => $this->arguments['width'],
                 'crop' => $cropArea->isEmpty() ? null : $cropArea->makeAbsoluteBasedOnFile($image),
             ];
-            if (!empty($this->arguments['fileExtension'])) {
-                $processingInstructions['fileExtension'] = $this->arguments['fileExtension'];
+            $fallbackFileExtension = $this->arguments['fileExtension'];
+            if ($this->arguments['breakpoints']
+                && ($this->arguments['addJpgFallbackSource'] || strtolower((string)$fallbackFileExtension) === 'webp')
+            ) {
+                $fallbackFileExtension = 'jpg';
             }
+            if (!empty($fallbackFileExtension)) {
+                $processingInstructions['fileExtension'] = $fallbackFileExtension;
+            }
+            $this->responsiveImagesUtility->addQualityToProcessingInstructions(
+                $processingInstructions,
+                $this->arguments['addJpgFallbackSource']
+                    ? ($this->arguments['sourceQuality'] ?? $this->arguments['imgQuality'])
+                    : $this->arguments['imgQuality']
+            );
             // Set min/maxWidth only if they are given
             if (!is_null($this->arguments['minWidth'])) {
                 $processingInstructions['minWidth'] = $this->arguments['minWidth'];
@@ -170,7 +217,12 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     $this->arguments['ignoreFileExtensions'],
                     (int) $this->arguments['placeholderSize'],
                     $this->arguments['placeholderInline'],
-                    $this->arguments['fileExtension']
+                    $this->arguments['fileExtension'],
+                    $cropVariant,
+                    $this->arguments['addJpgFallbackSource'],
+                    $this->arguments['sourceQuality'],
+                    $this->arguments['addLqip'],
+                    $this->arguments['lqipQuality']
                 );
             } elseif ($this->arguments['srcset']) {
                 // Generate img tag with srcset
@@ -188,7 +240,9 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     $this->arguments['ignoreFileExtensions'],
                     (int) $this->arguments['placeholderSize'],
                     $this->arguments['placeholderInline'],
-                    $this->arguments['fileExtension']
+                    $this->arguments['fileExtension'],
+                    $this->arguments['sourceQuality'],
+                    $this->arguments['lqipQuality']
                 );
             } else {
                 // For simple images, height calculation is not a problem and is done the same way
@@ -209,7 +263,8 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     $this->arguments['lazyload'],
                     (int) $this->arguments['placeholderSize'],
                     $this->arguments['placeholderInline'],
-                    $this->arguments['fileExtension']
+                    $this->arguments['fileExtension'],
+                    $this->arguments['lqipQuality']
                 );
             }
         } catch (ResourceDoesNotExistException $e) {
