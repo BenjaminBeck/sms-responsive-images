@@ -226,6 +226,38 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
         );
     }
 
+    #[Test]
+    public function generatesSrcsetImagesWithCustomExtensionAndQuality(): void
+    {
+        $originalImage = $this->mockFileObject(['width' => 1000, 'height' => 1000, 'extension' => 'jpg']);
+        $largestDimensions = [];
+
+        $this->assertEquals(
+            ['400w' => '/image-400-q50.webp'],
+            $this->utility->generateSrcsetImages(
+                $originalImage,
+                400,
+                [400],
+                null,
+                false,
+                'webp',
+                $largestDimensions,
+                50
+            )
+        );
+        $this->assertEquals(['width' => 400, 'height' => null], $largestDimensions);
+    }
+
+    #[Test]
+    public function addsQualityToProcessingInstructions(): void
+    {
+        $processingInstructions = ['additionalParameters' => '-strip'];
+
+        $this->utility->addQualityToProcessingInstructions($processingInstructions, 150);
+
+        $this->assertSame('-strip -quality 100', $processingInstructions['additionalParameters']);
+    }
+
     public static function generatePlaceholderImageProvider()
     {
         return [
@@ -271,6 +303,17 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
                 $inline,
                 $absoluteUri
             )
+        );
+    }
+
+    #[Test]
+    public function generatePlaceholderImageAppliesCustomExtensionAndQuality(): void
+    {
+        $originalImage = $this->mockFileObject(['width' => 1000, 'mimeType' => 'image/jpeg', 'extension' => 'jpg']);
+
+        $this->assertSame(
+            '/image-32-q2.webp',
+            $this->utility->generatePlaceholderImage($originalImage, 32, null, false, false, 'webp', 2)
         );
     }
 

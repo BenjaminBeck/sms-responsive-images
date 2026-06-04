@@ -47,14 +47,19 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
                     $instructions['mimeType'] = $file->getProperty('mimeType');
                 }
 
+                if (isset($instructions['additionalParameters'])) {
+                    $instructions['quality'] = trim(str_replace('-quality', '', $instructions['additionalParameters']));
+                }
+
                 return $test->mockFileObject($instructions, true);
             });
 
         $imageServiceMock
             ->method('getImageUri')
             ->willReturnCallback(function ($file, $absolute) {
+                $qualitySuffix = $file->getProperty('quality') !== null ? '-q' . $file->getProperty('quality') : '';
                 return (($absolute) ? 'http://domain.tld' : '') . '/' . $file->getProperty('name') . '-' . $file->getProperty('width')
-                    . '.' . $file->getProperty('extension');
+                    . $qualitySuffix . '.' . $file->getProperty('extension');
             });
 
         return $imageServiceMock;

@@ -506,4 +506,108 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
         $this->assertEquals($tagName, $tag->getTagName());
         $this->assertEquals(implode('', $tagContent), $tag->getContent());
     }
+
+    #[Test]
+    public function createPictureTagWithJpegFallbackSourceAndLqipBackground(): void
+    {
+        $cropVariantCollection = new CropVariantCollection([
+            new CropVariant('desktop', 'Desktop', Area::createEmpty()),
+            new CropVariant('mobile', 'Mobile', Area::createEmpty())
+        ]);
+        $originalImage = $this->mockFileObject([
+            'width' => 2000,
+            'height' => 1200,
+            'extension' => 'jpg',
+            'mimeType' => 'image/jpeg',
+        ]);
+        $fallbackImage = $this->mockFileObject([
+            'width' => 1000,
+            'height' => 600,
+            'extension' => 'webp',
+            'mimeType' => 'image/webp',
+        ]);
+
+        $tag = $this->utility->createPictureTag(
+            $originalImage,
+            $fallbackImage,
+            [
+                [
+                    'cropVariant' => 'desktop',
+                    'srcset' => [500, 1000],
+                    'media' => '(min-width: 768px)',
+                    'sizes' => 'auto',
+                ],
+                [
+                    'cropVariant' => 'mobile',
+                    'srcset' => [235, 470],
+                    'sizes' => 'auto, 50vw',
+                ],
+            ],
+            $cropVariantCollection,
+            null,
+            null,
+            null,
+            false,
+            false,
+            'svg, gif',
+            64,
+            true,
+            'webp',
+            'desktop',
+            true,
+            50,
+            true,
+            2
+        );
+
+        $this->assertSame('picture', $tag->getTagName());
+        $this->assertSame('has-lqip', $tag->getAttribute('class'));
+        $this->assertSame('--lqip: url("data:image/webp;base64,ZGFzLWlzdC1kZXItZGF0ZWlpbmhhbHQ=");', $tag->getAttribute('style'));
+        $this->assertSame(
+            '<source srcset="/image-500-q50.webp 500w, /image-1000-q50.webp 1000w" media="(min-width: 768px)" sizes="auto" type="image/webp" />'
+            . '<source srcset="/image-235-q50.webp 235w, /image-470-q50.webp 470w" sizes="auto, 50vw" type="image/webp" />'
+            . '<source srcset="/image-1000-q50.jpg" type="image/jpeg" width="1000" />'
+            . '<img src="/image-1000-q50.jpg" width="1000" alt="" data-sizes="auto" />',
+            $tag->getContent()
+        );
+    }
+
+    #[Test]
+    public function createPictureTagKeepsSvgSimpleWhenCustomExtensionIsRequested(): void
+    {
+        $originalImage = $this->mockFileObject([
+            'width' => 2000,
+            'height' => 2000,
+            'alternative' => 'svg alt',
+            'extension' => 'svg',
+            'mimeType' => 'image/svg+xml',
+        ]);
+        $fallbackImage = $this->mockFileObject([
+            'width' => 1000,
+            'height' => 1000,
+            'extension' => 'svg',
+            'mimeType' => 'image/svg+xml',
+        ]);
+
+        $tag = $this->utility->createPictureTag(
+            $originalImage,
+            $fallbackImage,
+            [['srcset' => [500, 1000]]],
+            new CropVariantCollection([]),
+            null,
+            null,
+            null,
+            false,
+            false,
+            'svg, gif',
+            0,
+            false,
+            'webp'
+        );
+
+        $this->assertSame('img', $tag->getTagName());
+        $this->assertSame('/image-2000.svg', $tag->getAttribute('src'));
+        $this->assertSame('picture', $tag->getAttribute('class'));
+        $this->assertSame('svg alt', $tag->getAttribute('alt'));
+    }
 }
