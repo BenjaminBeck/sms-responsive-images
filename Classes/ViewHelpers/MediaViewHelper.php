@@ -84,9 +84,23 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             null
         );
         $this->registerArgument(
+            'addAvif',
+            'bool',
+            'Add AVIF sources for picture breakpoints.',
+            false,
+            false
+        );
+        $this->registerArgument(
             'lqipQuality',
             'int',
             'ImageMagick quality for low quality image placeholders.',
+            false,
+            null
+        );
+        $this->registerArgument(
+            'qualityAvif',
+            'int',
+            'ImageMagick quality for AVIF source candidates.',
             false,
             null
         );
@@ -245,7 +259,9 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             false,
             $this->arguments['sourceQuality'],
             false,
-            $this->arguments['lqipQuality']
+            $this->arguments['lqipQuality'],
+            $this->arguments['addAvif'],
+            $this->arguments['qualityAvif']
         );
 
         return $this->tag->render();

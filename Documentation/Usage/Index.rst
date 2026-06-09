@@ -191,3 +191,52 @@ ignoreFileExtensions
 
 :aspect:`Mandatory`
    No
+
+
+addAvif
+^^^^^^^
+:aspect:`Variable type`
+   Boolean
+
+:aspect:`Description`
+   If set to TRUE, the ViewHelper will add AVIF encoded ``<source>`` tags for each configured picture breakpoint. The AVIF sources are rendered before the regular breakpoint sources so browsers can prefer AVIF when supported.
+   This requires AVIF write support in the configured ImageMagick/GraphicsMagick processor; otherwise no AVIF source is emitted.
+
+:aspect:`Default value`
+   FALSE
+
+:aspect:`Mandatory`
+   No
+
+Examples
+--------
+
+::
+
+   <sms:image image="{image}" breakpoints="{breakpoints}" addAvif="true" />
+
+   <sms:media file="{image}" breakpoints="{breakpoints}" addAvif="true" />
+
+
+qualityAvif
+^^^^^^^^^^^
+:aspect:`Variable type`
+   Integer
+
+:aspect:`Description`
+   ImageMagick quality for AVIF source candidates. Values outside the range 1-100 are clamped automatically.
+
+:aspect:`Default value`
+   NULL
+
+:aspect:`Mandatory`
+   No
+
+Examples
+--------
+
+::
+
+   <sms:image image="{image}" breakpoints="{breakpoints}" addAvif="true" qualityAvif="50" />
+
+   <sms:media file="{image}" breakpoints="{breakpoints}" addAvif="true" qualityAvif="50" />

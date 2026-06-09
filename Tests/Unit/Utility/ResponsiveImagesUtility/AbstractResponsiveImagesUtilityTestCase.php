@@ -34,6 +34,11 @@ abstract class AbstractResponsiveImagesUtilityTestCase extends \TYPO3\TestingFra
                 $instructions['width'] = isset($instructions['width'])
                     ? min($instructions['width'], $file->getProperty('width'))
                     : $file->getProperty('width');
+                if (!isset($instructions['height']) && $file->getProperty('width') && $file->getProperty('height')) {
+                    $instructions['height'] = (int)round(
+                        $instructions['width'] * $file->getProperty('height') / $file->getProperty('width')
+                    );
+                }
 
                 // Use file name and extension from original image
                 $instructions['name'] = $file->getProperty('name');

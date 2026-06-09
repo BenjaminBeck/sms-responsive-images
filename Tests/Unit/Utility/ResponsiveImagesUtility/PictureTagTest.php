@@ -44,9 +44,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<source srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source srcset="/image-400.jpg 400w, /image-800.jpg 800w" media="media mobile" sizes="sizes mobile" />',
-                    '<img src="/image-1000.jpg" width="1000" alt="" />'
+                    '<source srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source srcset="/image-400.jpg 400w, /image-800.jpg 800w" media="media mobile" sizes="sizes mobile" width="800" height="800" />',
+                    '<img src="/image-1000.jpg" width="1000" height="1000" alt="" />'
                 ]
             ],
             // Test two breakpoints, last one without media query, with standard output
@@ -69,9 +69,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<source srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source srcset="/image-400.jpg 400w, /image-800.jpg 800w" sizes="sizes mobile" />',
-                    '<img src="/image-1000.jpg" width="1000" alt="" />'
+                    '<source srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source srcset="/image-400.jpg 400w, /image-800.jpg 800w" sizes="sizes mobile" width="800" height="800" />',
+                    '<img src="/image-1000.jpg" width="1000" height="1000" alt="" />'
                 ]
             ],
             // Test focus area
@@ -86,7 +86,7 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<img src="/image-1000.jpg" width="1000" data-focus-area="'
+                    '<img src="/image-1000.jpg" width="1000" height="1000" data-focus-area="'
                         . htmlspecialchars(json_encode(['x' => 400, 'y' => 400, 'width' => 600, 'height' => 600]))
                         . '" alt="" />'
                 ]
@@ -103,7 +103,7 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<img src="/image-1000.jpg" width="1000" alt="image alt" title="image title" />'
+                    '<img src="/image-1000.jpg" width="1000" height="1000" alt="image alt" title="image title" />'
                 ]
             ],
             // Test lazyload markup with standard output
@@ -126,9 +126,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<source data-srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source data-srcset="/image-400.jpg 400w, /image-800.jpg 800w" sizes="sizes mobile" />',
-                    '<img data-src="/image-1000.jpg" class="lazyload" width="1000" alt="" />'
+                    '<source data-srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source data-srcset="/image-400.jpg 400w, /image-800.jpg 800w" sizes="sizes mobile" width="800" height="800" />',
+                    '<img data-src="/image-1000.jpg" class="lazyload" width="1000" height="1000" alt="" />'
                 ]
             ],
             // Test lazyload markup with placeholder
@@ -151,9 +151,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<source data-srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source data-srcset="/image-400.jpg 400w, /image-800.jpg 800w" sizes="sizes mobile" />',
-                    '<img data-src="/image-1000.jpg" class="lazyload" src="/image-20.jpg" width="1000" alt="" />'
+                    '<source data-srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source data-srcset="/image-400.jpg 400w, /image-800.jpg 800w" sizes="sizes mobile" width="800" height="800" />',
+                    '<img data-src="/image-1000.jpg" class="lazyload" src="/image-20.jpg" width="1000" height="1000" alt="" />'
                 ]
             ],
             // Test lazyload markup with inline placeholder
@@ -176,9 +176,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 true,
                 'picture',
                 [
-                    '<source data-srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source data-srcset="/image-400.jpg 400w, /image-800.jpg 800w" sizes="sizes mobile" />',
-                    '<img data-src="/image-1000.jpg" class="lazyload" src="data:image/jpeg;base64,ZGFzLWlzdC1kZXItZGF0ZWlpbmhhbHQ=" width="1000" alt="" />'
+                    '<source data-srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source data-srcset="/image-400.jpg 400w, /image-800.jpg 800w" sizes="sizes mobile" width="800" height="800" />',
+                    '<img data-src="/image-1000.jpg" class="lazyload" src="data:image/jpeg;base64,ZGFzLWlzdC1kZXItZGF0ZWlpbmhhbHQ=" width="1000" height="1000" alt="" />'
                 ]
             ],
         ];
@@ -278,7 +278,7 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 new CropVariantCollection([]),
                 clone $fallbackTag,
                 false,
-                ['<img alt="fixed alt" title="fixed title" longdesc="fixed longdesc" class="myClass" src="/image-1000.jpg" width="1000" />']
+                ['<img alt="fixed alt" title="fixed title" longdesc="fixed longdesc" class="myClass" src="/image-1000.jpg" width="1000" height="1000" />']
             ],
             // Test if fallback tag works with lazyloading
             'usingCustomFallbackTagWithLazyload' => [
@@ -287,7 +287,7 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 new CropVariantCollection([]),
                 clone $fallbackTag,
                 true,
-                ['<img alt="fixed alt" title="fixed title" longdesc="fixed longdesc" class="myClass lazyload" data-src="/image-1000.jpg" width="1000" />']
+                ['<img alt="fixed alt" title="fixed title" longdesc="fixed longdesc" class="myClass lazyload" data-src="/image-1000.jpg" width="1000" height="1000" />']
             ]
         ];
     }
@@ -388,9 +388,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<source srcset="/image-500.webp 500w, /image-1000.webp 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source srcset="/image-400.webp 400w, /image-800.webp 800w" media="media mobile" sizes="sizes mobile" />',
-                    '<img src="/image-1000.jpg" width="1000" alt="" />'
+                    '<source srcset="/image-500.webp 500w, /image-1000.webp 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source srcset="/image-400.webp 400w, /image-800.webp 800w" media="media mobile" sizes="sizes mobile" width="800" height="800" />',
+                    '<img src="/image-1000.jpg" width="1000" height="1000" alt="" />'
                 ]
             ],
             // Test lazyload markup with standard output
@@ -413,9 +413,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<source data-srcset="/image-500.webp 500w, /image-1000.webp 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source data-srcset="/image-400.webp 400w, /image-800.webp 800w" sizes="sizes mobile" />',
-                    '<img data-src="/image-1000.jpg" class="lazyload" width="1000" alt="" />'
+                    '<source data-srcset="/image-500.webp 500w, /image-1000.webp 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source data-srcset="/image-400.webp 400w, /image-800.webp 800w" sizes="sizes mobile" width="800" height="800" />',
+                    '<img data-src="/image-1000.jpg" class="lazyload" width="1000" height="1000" alt="" />'
                 ]
             ],
                         // Test lazyload markup with placeholder
@@ -438,9 +438,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 false,
                 'picture',
                 [
-                    '<source data-srcset="/image-500.webp 500w, /image-1000.webp 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source data-srcset="/image-400.webp 400w, /image-800.webp 800w" sizes="sizes mobile" />',
-                    '<img data-src="/image-1000.jpg" class="lazyload" src="/image-20.webp" width="1000" alt="" />'
+                    '<source data-srcset="/image-500.webp 500w, /image-1000.webp 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source data-srcset="/image-400.webp 400w, /image-800.webp 800w" sizes="sizes mobile" width="800" height="800" />',
+                    '<img data-src="/image-1000.jpg" class="lazyload" src="/image-20.webp" width="1000" height="1000" alt="" />'
                 ]
             ],
             // Test lazyload markup with inline placeholder
@@ -463,9 +463,9 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                 true,
                 'picture',
                 [
-                    '<source data-srcset="/image-500.webp 500w, /image-1000.webp 1000w" media="media desktop" sizes="sizes desktop" />',
-                    '<source data-srcset="/image-400.webp 400w, /image-800.webp 800w" sizes="sizes mobile" />',
-                    '<img data-src="/image-1000.jpg" class="lazyload" src="data:image/webp;base64,ZGFzLWlzdC1kZXItZGF0ZWlpbmhhbHQ=" width="1000" alt="" />'
+                    '<source data-srcset="/image-500.webp 500w, /image-1000.webp 1000w" media="media desktop" sizes="sizes desktop" width="1000" height="1000" />',
+                    '<source data-srcset="/image-400.webp 400w, /image-800.webp 800w" sizes="sizes mobile" width="800" height="800" />',
+                    '<img data-src="/image-1000.jpg" class="lazyload" src="data:image/webp;base64,ZGFzLWlzdC1kZXItZGF0ZWlpbmhhbHQ=" width="1000" height="1000" alt="" />'
                 ]
             ],
         ];
@@ -564,10 +564,76 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
         $this->assertSame('has-lqip', $tag->getAttribute('class'));
         $this->assertSame('--lqip: url(&quot;data:image/webp;base64,ZGFzLWlzdC1kZXItZGF0ZWlpbmhhbHQ=&quot;);', $tag->getAttribute('style'));
         $this->assertSame(
-            '<source srcset="/image-500-q50.webp 500w, /image-1000-q50.webp 1000w" media="(min-width: 768px)" sizes="auto" type="image/webp" />'
-            . '<source srcset="/image-235-q50.webp 235w, /image-470-q50.webp 470w" sizes="auto, 50vw" type="image/webp" />'
-            . '<source srcset="/image-1000-q50.jpg" type="image/jpeg" width="1000" />'
-            . '<img src="/image-1000-q50.jpg" width="1000" alt="" data-sizes="auto" />',
+            '<source srcset="/image-500-q50.webp 500w, /image-1000-q50.webp 1000w" media="(min-width: 768px)" sizes="auto" width="1000" height="600" type="image/webp" />'
+            . '<source srcset="/image-235-q50.webp 235w, /image-470-q50.webp 470w" sizes="auto, 50vw" width="470" height="282" type="image/webp" />'
+            . '<source srcset="/image-1000-q50.jpg" type="image/jpeg" width="1000" height="600" />'
+                        . '<img src="/image-1000-q50.jpg" width="1000" height="600" alt="" data-sizes="auto" />',
+            $tag->getContent()
+        );
+    }
+
+    #[Test]
+    public function createPictureTagWithAvifSources(): void
+    {
+        $cropVariantCollection = new CropVariantCollection([
+            new CropVariant('desktop', 'Desktop', Area::createEmpty()),
+            new CropVariant('mobile', 'Mobile', Area::createEmpty())
+        ]);
+        $originalImage = $this->mockFileObject([
+            'width' => 2000,
+            'height' => 1200,
+            'extension' => 'jpg',
+            'mimeType' => 'image/jpeg',
+        ]);
+        $fallbackImage = $this->mockFileObject([
+            'width' => 1000,
+            'height' => 600,
+            'extension' => 'jpg',
+            'mimeType' => 'image/jpeg',
+        ]);
+
+        $tag = $this->utility->createPictureTag(
+            $originalImage,
+            $fallbackImage,
+            [
+                [
+                    'cropVariant' => 'desktop',
+                    'srcset' => [500, 1000],
+                    'media' => '(min-width: 768px)',
+                    'sizes' => 'auto',
+                ],
+                [
+                    'cropVariant' => 'mobile',
+                    'srcset' => [235, 470],
+                    'sizes' => 'auto, 50vw',
+                ],
+            ],
+            $cropVariantCollection,
+            null,
+            null,
+            null,
+            false,
+            false,
+            'svg, gif',
+            0,
+            false,
+            null,
+            'desktop',
+            false,
+            null,
+            false,
+            null,
+            true,
+            38
+        );
+
+        $this->assertSame('picture', $tag->getTagName());
+        $this->assertSame(
+            '<source srcset="/image-500-q38.avif 500w, /image-1000-q38.avif 1000w" media="(min-width: 768px)" sizes="auto" width="1000" height="600" type="image/avif" />'
+            . '<source srcset="/image-500.jpg 500w, /image-1000.jpg 1000w" media="(min-width: 768px)" sizes="auto" width="1000" height="600" />'
+            . '<source srcset="/image-235-q38.avif 235w, /image-470-q38.avif 470w" sizes="auto, 50vw" width="470" height="282" type="image/avif" />'
+            . '<source srcset="/image-235.jpg 235w, /image-470.jpg 470w" sizes="auto, 50vw" width="470" height="282" />'
+            . '<img src="/image-1000.jpg" width="1000" height="600" alt="" />',
             $tag->getContent()
         );
     }

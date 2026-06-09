@@ -199,7 +199,9 @@ class ResponsiveImagesUtility implements SingletonInterface
         bool $addJpgFallbackSource = false,
         ?int $sourceQuality = null,
         bool $addLqip = false,
-        ?int $lqipQuality = null
+        ?int $lqipQuality = null,
+        bool $addAvif = false,
+        ?int $qualityAvif = null
     ): TagBuilder {
         $tag = $tag ?: GeneralUtility::makeInstance(TagBuilder::class, 'picture');
         $fallbackTag = $fallbackTag ?: GeneralUtility::makeInstance(TagBuilder::class, 'img');
@@ -288,8 +290,9 @@ class ResponsiveImagesUtility implements SingletonInterface
             );
         }
 
-        // Provide image width to be consistent with TYPO3 core behavior
+        // Provide image dimensions to be consistent with TYPO3 core behavior
         $fallbackTag->addAttribute('width', $referenceWidth);
+        $fallbackTag->addAttribute('height', $fallbackImage->getProperty('height'));
 
         // Add metadata to fallback image
         $this->addMetadataToImageTag($fallbackTag, $originalImage, $fallbackImage, $focusArea);
@@ -310,6 +313,26 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $fileExtension,
                 $sourceQuality
             );
+
+            if ($addAvif && strtolower((string)$fileExtension) !== 'avif') {
+                $sourceTagAvif = $this->createPictureSourceTag(
+                    $originalImage,
+                    $referenceWidth,
+                    $breakpoint['srcset'],
+                    $breakpoint['media'],
+                    $breakpoint['sizes'],
+                    $cropArea,
+                    $absoluteUri,
+                    $lazyload,
+                    'avif',
+                    $qualityAvif
+                );
+                $srcsetAttributeNameAvif = $sourceTagAvif->hasAttribute('data-srcset') ? 'data-srcset' : 'srcset';
+                if ($this->getMimeTypeFromSrcset((string)$sourceTagAvif->getAttribute($srcsetAttributeNameAvif)) === 'image/avif') {
+                    $sourceTagAvif->addAttribute('type', 'image/avif');
+                    $sourceTags[] = $sourceTagAvif->render();
+                }
+            }
 
             $srcsetAttributeName = $sourceTag->hasAttribute('data-srcset') ? 'data-srcset' : 'srcset';
             $sourceMimeType = $this->getMimeTypeFromSrcset((string)$sourceTag->getAttribute($srcsetAttributeName));
@@ -368,11 +391,12 @@ class ResponsiveImagesUtility implements SingletonInterface
 
     protected function getMimeTypeFromSrcset(string $srcset): ?string
     {
-        if (preg_match('/\.(jpe?g|png|webp)\b/i', $srcset, $matches) !== 1) {
+        if (preg_match('/\.(jpe?g|png|webp|avif)(?:[?#][^\s,]*)?(?=\s+\d+(?:w|x)\b|\s*,|$)/i', $srcset, $matches) !== 1) {
             return null;
         }
 
         return match (strtolower($matches[1])) {
+            'avif' => 'image/avif',
             'png' => 'image/png',
             'webp' => 'image/webp',
             default => 'image/jpeg',
@@ -486,6 +510,12 @@ class ResponsiveImagesUtility implements SingletonInterface
         }
         if ($srcsetMode == 'w' && $sizesQuery) {
             $sourceTag->addAttribute('sizes', sprintf($sizesQuery, $defaultWidth));
+        }
+        if (!empty($largestDimensions['width'])) {
+            $sourceTag->addAttribute('width', $largestDimensions['width']);
+        }
+        if (!empty($largestDimensions['height'])) {
+            $sourceTag->addAttribute('height', $largestDimensions['height']);
         }
 
         return $sourceTag;

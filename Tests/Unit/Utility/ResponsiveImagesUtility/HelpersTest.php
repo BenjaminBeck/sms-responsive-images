@@ -245,7 +245,7 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
                 50
             )
         );
-        $this->assertEquals(['width' => 400, 'height' => null], $largestDimensions);
+        $this->assertEquals(['width' => 400, 'height' => 400], $largestDimensions);
     }
 
     #[Test]

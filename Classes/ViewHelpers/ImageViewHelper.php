@@ -95,6 +95,13 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
             false
         );
         $this->registerArgument(
+            'addAvif',
+            'bool',
+            'Add AVIF sources for picture breakpoints.',
+            false,
+            false
+        );
+        $this->registerArgument(
             'imgQuality',
             'int',
             'ImageMagick quality for the fallback img.',
@@ -112,6 +119,13 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
             'lqipQuality',
             'int',
             'ImageMagick quality for low quality image placeholders.',
+            false,
+            null
+        );
+        $this->registerArgument(
+            'qualityAvif',
+            'int',
+            'ImageMagick quality for AVIF source candidates.',
             false,
             null
         );
@@ -222,7 +236,9 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     $this->arguments['addJpgFallbackSource'],
                     $this->arguments['sourceQuality'],
                     $this->arguments['addLqip'],
-                    $this->arguments['lqipQuality']
+                    $this->arguments['lqipQuality'],
+                    $this->arguments['addAvif'],
+                    $this->arguments['qualityAvif']
                 );
             } elseif ($this->arguments['srcset']) {
                 // Generate img tag with srcset
