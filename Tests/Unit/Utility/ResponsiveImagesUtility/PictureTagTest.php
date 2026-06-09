@@ -4,6 +4,8 @@ namespace Sitegeist\ResponsiveImages\Tests\Unit\Utility\ResponsiveImagesUtility;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Package\PackageManager;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3Fluid\Fluid\Core\ViewHelper\TagBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\CropVariantCollection;
@@ -570,6 +572,148 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
                         . '<img src="/image-1000-q50.jpg" width="1000" height="600" alt="" data-sizes="auto" />',
             $tag->getContent()
         );
+    }
+
+    #[Test]
+    public function createPictureTagDoesNotAddWebpSourcesByDefault(): void
+    {
+        $cropVariantCollection = new CropVariantCollection([
+            new CropVariant('desktop', 'Desktop', Area::createEmpty()),
+            new CropVariant('mobile', 'Mobile', Area::createEmpty())
+        ]);
+        $originalImage = $this->mockFileObject([
+            'width' => 2000,
+            'height' => 1200,
+            'extension' => 'jpg',
+            'mimeType' => 'image/jpeg',
+        ]);
+        $fallbackImage = $this->mockFileObject([
+            'width' => 1000,
+            'height' => 600,
+            'extension' => 'jpg',
+            'mimeType' => 'image/jpeg',
+        ]);
+
+        $tag = $this->utility->createPictureTag(
+            $originalImage,
+            $fallbackImage,
+            [
+                [
+                    'cropVariant' => 'desktop',
+                    'srcset' => [500, 1000],
+                    'media' => '(min-width: 768px)',
+                    'sizes' => 'auto',
+                ],
+                [
+                    'cropVariant' => 'mobile',
+                    'srcset' => [235, 470],
+                    'sizes' => 'auto, 50vw',
+                ],
+            ],
+            $cropVariantCollection,
+            null,
+            null,
+            null,
+            false,
+            false,
+            'svg, gif',
+            0,
+            false,
+            null,
+            'desktop',
+            false,
+            50
+        );
+
+        $this->assertSame('picture', $tag->getTagName());
+        $this->assertSame(
+            '<source srcset="/image-500-q50.jpg 500w, /image-1000-q50.jpg 1000w" media="(min-width: 768px)" sizes="auto" width="1000" height="600" type="image/jpeg" />'
+            . '<source srcset="/image-235-q50.jpg 235w, /image-470-q50.jpg 470w" sizes="auto, 50vw" width="470" height="282" type="image/jpeg" />'
+            . '<img src="/image-1000.jpg" width="1000" height="600" alt="" />',
+            $tag->getContent()
+        );
+    }
+
+    #[Test]
+    public function createPictureTagAddsWebpSourcesWhenEnabled(): void
+    {
+        $packageManagerProperty = new \ReflectionProperty(ExtensionManagementUtility::class, 'packageManager');
+        $packageManagerProperty->setAccessible(true);
+        $originalPackageManager = $packageManagerProperty->getValue();
+
+        $packageManager = $this->createStub(PackageManager::class);
+        $packageManager
+            ->method('isPackageActive')
+            ->willReturnCallback(static fn($packageKey) => $packageKey === 'webp');
+
+        ExtensionManagementUtility::setPackageManager($packageManager);
+
+        try {
+            $cropVariantCollection = new CropVariantCollection([
+                new CropVariant('desktop', 'Desktop', Area::createEmpty()),
+                new CropVariant('mobile', 'Mobile', Area::createEmpty())
+            ]);
+            $originalImage = $this->mockFileObject([
+                'width' => 2000,
+                'height' => 1200,
+                'extension' => 'jpg',
+                'mimeType' => 'image/jpeg',
+            ]);
+            $fallbackImage = $this->mockFileObject([
+                'width' => 1000,
+                'height' => 600,
+                'extension' => 'jpg',
+                'mimeType' => 'image/jpeg',
+            ]);
+
+            $tag = $this->utility->createPictureTag(
+                $originalImage,
+                $fallbackImage,
+                [
+                    [
+                        'cropVariant' => 'desktop',
+                        'srcset' => [500, 1000],
+                        'media' => '(min-width: 768px)',
+                        'sizes' => 'auto',
+                    ],
+                    [
+                        'cropVariant' => 'mobile',
+                        'srcset' => [235, 470],
+                        'sizes' => 'auto, 50vw',
+                    ],
+                ],
+                $cropVariantCollection,
+                null,
+                null,
+                null,
+                false,
+                false,
+                'svg, gif',
+                0,
+                false,
+                null,
+                'desktop',
+                false,
+                50,
+                false,
+                null,
+                false,
+                null,
+                true
+            );
+
+            $this->assertSame('picture', $tag->getTagName());
+            $this->assertSame(
+                '<source srcset="/image-500-q50.jpg.webp 500w, /image-1000-q50.jpg.webp 1000w" media="(min-width: 768px)" sizes="auto" width="1000" height="600" type="image/webp" />'
+                . '<source srcset="/image-500-q50.jpg 500w, /image-1000-q50.jpg 1000w" media="(min-width: 768px)" sizes="auto" width="1000" height="600" type="image/jpeg" />'
+                . '<source srcset="/image-235-q50.jpg.webp 235w, /image-470-q50.jpg.webp 470w" sizes="auto, 50vw" width="470" height="282" type="image/webp" />'
+                . '<source srcset="/image-235-q50.jpg 235w, /image-470-q50.jpg 470w" sizes="auto, 50vw" width="470" height="282" type="image/jpeg" />'
+                . '<img src="/image-1000.jpg" width="1000" height="600" alt="" />',
+                $tag->getContent()
+            );
+        } finally {
+            ExtensionManagementUtility::setPackageManager($originalPackageManager);
+        }
     }
 
     #[Test]

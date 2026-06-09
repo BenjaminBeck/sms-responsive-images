@@ -102,6 +102,13 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
             false
         );
         $this->registerArgument(
+            'addWebp',
+            'bool',
+            'Add WebP sources for picture breakpoints.',
+            false,
+            false
+        );
+        $this->registerArgument(
             'imgQuality',
             'int',
             'ImageMagick quality for the fallback img.',
@@ -238,7 +245,8 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     $this->arguments['addLqip'],
                     $this->arguments['lqipQuality'],
                     $this->arguments['addAvif'],
-                    $this->arguments['qualityAvif']
+                    $this->arguments['qualityAvif'],
+                    $this->arguments['addWebp']
                 );
             } elseif ($this->arguments['srcset']) {
                 // Generate img tag with srcset

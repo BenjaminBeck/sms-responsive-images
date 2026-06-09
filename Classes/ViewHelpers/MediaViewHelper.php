@@ -35,7 +35,13 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
     {
         parent::initializeArguments();
         $this->registerArgument('file', 'object', 'File', true);
-        $this->registerArgument('additionalConfig', 'array', 'This array can hold additional configuration that is passed though to the Renderer object', false, []);
+        $this->registerArgument(
+            'additionalConfig',
+            'array',
+            'This array can hold additional configuration that is passed though to the Renderer object',
+            false,
+            []
+        );
         // phpcs:disable Generic.Files.LineLength
         $this->registerArgument('width', 'string', 'This can be a numeric value representing the fixed width of in pixels. But you can also perform simple calculations by adding "m" or "c" to the value. See imgResource.width for possible options.');
         $this->registerArgument('height', 'string', 'This can be a numeric value representing the fixed height in pixels. But you can also perform simple calculations by adding "m" or "c" to the value. See imgResource.width for possible options.');
@@ -87,6 +93,13 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             'addAvif',
             'bool',
             'Add AVIF sources for picture breakpoints.',
+            false,
+            false
+        );
+        $this->registerArgument(
+            'addWebp',
+            'bool',
+            'Add WebP sources for picture breakpoints.',
             false,
             false
         );
@@ -261,7 +274,8 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             false,
             $this->arguments['lqipQuality'],
             $this->arguments['addAvif'],
-            $this->arguments['qualityAvif']
+            $this->arguments['qualityAvif'],
+            $this->arguments['addWebp']
         );
 
         return $this->tag->render();

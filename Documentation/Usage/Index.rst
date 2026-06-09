@@ -218,6 +218,31 @@ Examples
    <sms:media file="{image}" breakpoints="{breakpoints}" addAvif="true" />
 
 
+addWebp
+^^^^^^^
+:aspect:`Variable type`
+   Boolean
+
+:aspect:`Description`
+   If set to TRUE, the ViewHelper will add WebP encoded ``<source>`` tags for each configured picture breakpoint. The WebP sources are rendered before the regular breakpoint sources so browsers can prefer WebP when supported.
+   This requires the TYPO3 ``webp`` extension to be loaded; otherwise no WebP source is emitted.
+
+:aspect:`Default value`
+   FALSE
+
+:aspect:`Mandatory`
+   No
+
+Examples
+--------
+
+::
+
+   <sms:image image="{image}" breakpoints="{breakpoints}" addWebp="true" />
+
+   <sms:media file="{image}" breakpoints="{breakpoints}" addWebp="true" />
+
+
 qualityAvif
 ^^^^^^^^^^^
 :aspect:`Variable type`

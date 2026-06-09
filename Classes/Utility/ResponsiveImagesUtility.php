@@ -201,7 +201,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         bool $addLqip = false,
         ?int $lqipQuality = null,
         bool $addAvif = false,
-        ?int $qualityAvif = null
+        ?int $qualityAvif = null,
+        bool $addWebp = false
     ): TagBuilder {
         $tag = $tag ?: GeneralUtility::makeInstance(TagBuilder::class, 'picture');
         $fallbackTag = $fallbackTag ?: GeneralUtility::makeInstance(TagBuilder::class, 'img');
@@ -328,7 +329,10 @@ class ResponsiveImagesUtility implements SingletonInterface
                     $qualityAvif
                 );
                 $srcsetAttributeNameAvif = $sourceTagAvif->hasAttribute('data-srcset') ? 'data-srcset' : 'srcset';
-                if ($this->getMimeTypeFromSrcset((string)$sourceTagAvif->getAttribute($srcsetAttributeNameAvif)) === 'image/avif') {
+                $sourceMimeTypeAvif = $this->getMimeTypeFromSrcset(
+                    (string)$sourceTagAvif->getAttribute($srcsetAttributeNameAvif)
+                );
+                if ($sourceMimeTypeAvif === 'image/avif') {
                     $sourceTagAvif->addAttribute('type', 'image/avif');
                     $sourceTags[] = $sourceTagAvif->render();
                 }
@@ -339,12 +343,15 @@ class ResponsiveImagesUtility implements SingletonInterface
             if ($sourceMimeType && ($sourceQuality !== null || $addJpgFallbackSource || $addLqip)) {
                 $sourceTag->addAttribute('type', $sourceMimeType);
 
-                if ($sourceMimeType !== 'image/webp' && ExtensionManagementUtility::isLoaded('webp')) {
+                if ($addWebp && $sourceMimeType !== 'image/webp' && ExtensionManagementUtility::isLoaded('webp')) {
                     $sourceTagWebP = clone $sourceTag;
                     foreach (['srcset', 'data-srcset'] as $attributeName) {
                         $attribute = (string)$sourceTagWebP->getAttribute($attributeName);
                         if ($attribute !== '') {
-                            $sourceTagWebP->addAttribute($attributeName, $this->appendWebpExtensionToImageUrls($attribute));
+                            $sourceTagWebP->addAttribute(
+                                $attributeName,
+                                $this->appendWebpExtensionToImageUrls($attribute)
+                            );
                         }
                     }
                     $sourceTagWebP->addAttribute('type', 'image/webp');
@@ -391,7 +398,8 @@ class ResponsiveImagesUtility implements SingletonInterface
 
     protected function getMimeTypeFromSrcset(string $srcset): ?string
     {
-        if (preg_match('/\.(jpe?g|png|webp|avif)(?:[?#][^\s,]*)?(?=\s+\d+(?:w|x)\b|\s*,|$)/i', $srcset, $matches) !== 1) {
+        $imageExtensionPattern = '/\.(jpe?g|png|webp|avif)(?:[?#][^\s,]*)?(?=\s+\d+(?:w|x)\b|\s*,|$)/i';
+        if (preg_match($imageExtensionPattern, $srcset, $matches) !== 1) {
             return null;
         }
 
@@ -704,7 +712,9 @@ class ResponsiveImagesUtility implements SingletonInterface
             if ($srcsetMode === 'w' && $processedWidth !== $candidateWidth) {
                 $widthDescriptor = $processedWidth . 'w';
             }
-            if (is_array($largestDimensions) && (empty($largestDimensions['width']) || $processedWidth > $largestDimensions['width'])) {
+            $isLargestProcessedWidth = is_array($largestDimensions)
+                && (empty($largestDimensions['width']) || $processedWidth > $largestDimensions['width']);
+            if ($isLargestProcessedWidth) {
                 $largestDimensions = [
                     'width' => $processedWidth,
                     'height' => $processedHeight,
