@@ -117,6 +117,13 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             false,
             null
         );
+        $this->registerArgument(
+            'backgroundColor',
+            'string',
+            'ImageMagick background color used to matte transparent source pixels.',
+            false,
+            null
+        );
     }
 
     /**
@@ -190,6 +197,10 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
         if (!empty($fileExtension)) {
             $processingInstructions['fileExtension'] = $fileExtension;
         }
+        $this->responsiveImagesUtility->addBackgroundColorToProcessingInstructions(
+            $processingInstructions,
+            $this->arguments['backgroundColor']
+        );
         $processedImage = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
         $imageUri = $this->imageService->getImageUri($processedImage);
 
@@ -275,7 +286,8 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             $this->arguments['lqipQuality'],
             $this->arguments['addAvif'],
             $this->arguments['qualityAvif'],
-            $this->arguments['addWebp']
+            $this->arguments['addWebp'],
+            $this->arguments['backgroundColor']
         );
 
         return $this->tag->render();
@@ -327,7 +339,8 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
             $this->arguments['placeholderInline'],
             $fileExtension,
             $this->arguments['sourceQuality'],
-            $this->arguments['lqipQuality']
+            $this->arguments['lqipQuality'],
+            $this->arguments['backgroundColor']
         );
 
         return $this->tag->render();
@@ -355,6 +368,10 @@ final class MediaViewHelper extends AbstractTagBasedViewHelper
         if (!empty($fileExtension)) {
             $processingInstructions['fileExtension'] = $fileExtension;
         }
+        $this->responsiveImagesUtility->addBackgroundColorToProcessingInstructions(
+            $processingInstructions,
+            $this->arguments['backgroundColor']
+        );
         $fallbackImage = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
 
         return $fallbackImage;

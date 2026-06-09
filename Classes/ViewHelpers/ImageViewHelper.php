@@ -136,6 +136,13 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
             false,
             null
         );
+        $this->registerArgument(
+            'backgroundColor',
+            'string',
+            'ImageMagick background color used to matte transparent source pixels.',
+            false,
+            null
+        );
     }
 
     /**
@@ -214,6 +221,10 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     ? ($this->arguments['sourceQuality'] ?? $this->arguments['imgQuality'])
                     : $this->arguments['imgQuality']
             );
+            $this->responsiveImagesUtility->addBackgroundColorToProcessingInstructions(
+                $processingInstructions,
+                $this->arguments['backgroundColor']
+            );
             // Set min/maxWidth only if they are given
             if (!is_null($this->arguments['minWidth'])) {
                 $processingInstructions['minWidth'] = $this->arguments['minWidth'];
@@ -246,7 +257,8 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     $this->arguments['lqipQuality'],
                     $this->arguments['addAvif'],
                     $this->arguments['qualityAvif'],
-                    $this->arguments['addWebp']
+                    $this->arguments['addWebp'],
+                    $this->arguments['backgroundColor']
                 );
             } elseif ($this->arguments['srcset']) {
                 // Generate img tag with srcset
@@ -266,7 +278,8 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     $this->arguments['placeholderInline'],
                     $this->arguments['fileExtension'],
                     $this->arguments['sourceQuality'],
-                    $this->arguments['lqipQuality']
+                    $this->arguments['lqipQuality'],
+                    $this->arguments['backgroundColor']
                 );
             } else {
                 // For simple images, height calculation is not a problem and is done the same way
@@ -288,7 +301,8 @@ final class ImageViewHelper extends AbstractTagBasedViewHelper
                     (int) $this->arguments['placeholderSize'],
                     $this->arguments['placeholderInline'],
                     $this->arguments['fileExtension'],
-                    $this->arguments['lqipQuality']
+                    $this->arguments['lqipQuality'],
+                    $this->arguments['backgroundColor']
                 );
             }
         } catch (ResourceDoesNotExistException $e) {

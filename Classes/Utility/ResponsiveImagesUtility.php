@@ -76,7 +76,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         bool $placeholderInline = false,
         ?string $fileExtension = null,
         ?int $sourceQuality = null,
-        ?int $lqipQuality = null
+        ?int $lqipQuality = null,
+        ?string $backgroundColor = null
     ): TagBuilder {
         $tag = $tag ?: GeneralUtility::makeInstance(TagBuilder::class, 'img');
 
@@ -92,7 +93,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $placeholderSize,
                 $placeholderInline,
                 $fileExtension,
-                $lqipQuality
+                $lqipQuality,
+                $backgroundColor
             );
         }
 
@@ -117,7 +119,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $placeholderInline,
                 $absoluteUri,
                 $fileExtension,
-                $lqipQuality
+                $lqipQuality,
+                $backgroundColor
             ));
         }
 
@@ -137,7 +140,8 @@ class ResponsiveImagesUtility implements SingletonInterface
             $absoluteUri,
             $fileExtension,
             $unusedDimensions,
-            $sourceQuality
+            $sourceQuality,
+            $backgroundColor
         );
         $srcsetMode = substr(key($srcsetImages) ?? 'w', -1); // x or w
 
@@ -202,7 +206,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         ?int $lqipQuality = null,
         bool $addAvif = false,
         ?int $qualityAvif = null,
-        bool $addWebp = false
+        bool $addWebp = false,
+        ?string $backgroundColor = null
     ): TagBuilder {
         $tag = $tag ?: GeneralUtility::makeInstance(TagBuilder::class, 'picture');
         $fallbackTag = $fallbackTag ?: GeneralUtility::makeInstance(TagBuilder::class, 'img');
@@ -226,7 +231,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $placeholderSize,
                 $placeholderInline,
                 $this->hasIgnoredFileExtension($originalImage, $ignoreFileExtensions, null) ? null : $fileExtension,
-                $lqipQuality
+                $lqipQuality,
+                $backgroundColor
             );
         }
 
@@ -244,7 +250,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                     $originalImage,
                     (int)$referenceWidth,
                     $cropVariantCollection->getCropArea($cropVariant),
-                    $sourceQuality
+                    $sourceQuality,
+                    $backgroundColor
                 );
             $fallbackImage = $jpgFallbackImage;
             $referenceWidth = $fallbackImage->getProperty('width');
@@ -272,7 +279,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $placeholderInline,
                 $absoluteUri,
                 $fileExtension,
-                $lqipQuality
+                $lqipQuality,
+                $backgroundColor
             ));
         }
 
@@ -286,7 +294,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                     true,
                     $absoluteUri,
                     $fileExtension,
-                    $lqipQuality
+                    $lqipQuality,
+                    $backgroundColor
                 )
             );
         }
@@ -312,7 +321,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $absoluteUri,
                 $lazyload,
                 $fileExtension,
-                $sourceQuality
+                $sourceQuality,
+                $backgroundColor
             );
 
             if ($addAvif && strtolower((string)$fileExtension) !== 'avif') {
@@ -326,7 +336,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                     $absoluteUri,
                     $lazyload,
                     'avif',
-                    $qualityAvif
+                    $qualityAvif,
+                    $backgroundColor
                 );
                 $srcsetAttributeNameAvif = $sourceTagAvif->hasAttribute('data-srcset') ? 'data-srcset' : 'srcset';
                 $sourceMimeTypeAvif = $this->getMimeTypeFromSrcset(
@@ -368,7 +379,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $cropVariantCollection->getCropArea($cropVariant),
                 $absoluteUri,
                 $sourceQuality,
-                $jpgFallbackImage
+                $jpgFallbackImage,
+                $backgroundColor
             )->render();
         }
 
@@ -420,7 +432,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         FileInterface $originalImage,
         int $width,
         Area $cropArea,
-        ?int $quality = null
+        ?int $quality = null,
+        ?string $backgroundColor = null
     ): FileInterface {
         $processingInstructions = [
             'width' => $width,
@@ -428,6 +441,7 @@ class ResponsiveImagesUtility implements SingletonInterface
             'fileExtension' => 'jpg',
         ];
         $this->addQualityToProcessingInstructions($processingInstructions, $quality);
+        $this->addBackgroundColorToProcessingInstructions($processingInstructions, $backgroundColor);
 
         return $this->imageService->applyProcessingInstructions($originalImage, $processingInstructions);
     }
@@ -448,9 +462,11 @@ class ResponsiveImagesUtility implements SingletonInterface
         Area $cropArea,
         bool $absoluteUri = false,
         ?int $quality = null,
-        ?FileInterface $processedImage = null
+        ?FileInterface $processedImage = null,
+        ?string $backgroundColor = null
     ): TagBuilder {
-        $processedImage = $processedImage ?: $this->createJpgFallbackImage($originalImage, $width, $cropArea, $quality);
+        $processedImage = $processedImage
+            ?: $this->createJpgFallbackImage($originalImage, $width, $cropArea, $quality, $backgroundColor);
 
         $sourceTag = GeneralUtility::makeInstance(TagBuilder::class, 'source');
         $sourceTag->addAttribute('srcset', $this->imageService->getImageUri($processedImage, $absoluteUri));
@@ -489,7 +505,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         bool $absoluteUri = false,
         bool $lazyload = false,
         ?string $fileExtension = null,
-        ?int $sourceQuality = null
+        ?int $sourceQuality = null,
+        ?string $backgroundColor = null
     ): TagBuilder {
         $cropArea = $cropArea ?: Area::createEmpty();
 
@@ -506,7 +523,8 @@ class ResponsiveImagesUtility implements SingletonInterface
             $absoluteUri,
             $fileExtension,
             $largestDimensions,
-            $sourceQuality
+            $sourceQuality,
+            $backgroundColor
         );
         $srcsetMode = substr(key($srcsetImages) ?? 'w', -1); // x or w
 
@@ -553,7 +571,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         int $placeholderSize = 0,
         bool $placeholderInline = false,
         ?string $fileExtension = null,
-        ?int $lqipQuality = null
+        ?int $lqipQuality = null,
+        ?string $backgroundColor = null
     ): TagBuilder {
         $tag = $tag ?: GeneralUtility::makeInstance(TagBuilder::class, 'img');
         $fallbackImage = ($fallbackImage) ?: $originalImage;
@@ -568,9 +587,11 @@ class ResponsiveImagesUtility implements SingletonInterface
         }
 
         if (!empty($fileExtension)) {
-            $simpleImage = $this->imageService->applyProcessingInstructions($originalImage, [
+            $processingInstructions = [
                 'fileExtension' => $fileExtension
-            ]);
+            ];
+            $this->addBackgroundColorToProcessingInstructions($processingInstructions, $backgroundColor);
+            $simpleImage = $this->imageService->applyProcessingInstructions($originalImage, $processingInstructions);
         } else {
             $simpleImage = $originalImage;
         }
@@ -587,7 +608,8 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $placeholderInline,
                 $absoluteUri,
                 $fileExtension,
-                $lqipQuality
+                $lqipQuality,
+                $backgroundColor
             ));
         }
 
@@ -665,7 +687,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         bool $absoluteUri = false,
         ?string $fileExtension = null,
         &$largestDimensions = null,
-        ?int $quality = null
+        ?int $quality = null,
+        ?string $backgroundColor = null
     ): array {
         $cropArea = $cropArea ?: Area::createEmpty();
 
@@ -721,6 +744,7 @@ class ResponsiveImagesUtility implements SingletonInterface
                 $processingInstructions['fileExtension'] = $fileExtension;
             }
             $this->addQualityToProcessingInstructions($processingInstructions, $quality);
+            $this->addBackgroundColorToProcessingInstructions($processingInstructions, $backgroundColor);
             $processedImage = $this->imageService->applyProcessingInstructions($sourceImage, $processingInstructions);
 
             // If processed file isn't as wide as it should be ([GFX][processor_allowUpscaling] set to false)
@@ -770,6 +794,24 @@ class ResponsiveImagesUtility implements SingletonInterface
         );
     }
 
+    public function addBackgroundColorToProcessingInstructions(
+        array &$processingInstructions,
+        ?string $backgroundColor = null
+    ): void {
+        $backgroundColor = trim((string)$backgroundColor);
+        if ($backgroundColor === '') {
+            return;
+        }
+        if (!preg_match('/^(#[0-9A-Fa-f]{3,8}|[A-Za-z]+)$/', $backgroundColor)) {
+            return;
+        }
+
+        $processingInstructions['additionalParameters'] = trim(
+            ($processingInstructions['additionalParameters'] ?? '')
+            . ' -background ' . escapeshellarg($backgroundColor) . ' -alpha remove -alpha off'
+        );
+    }
+
     /**
      * Generates a tiny placeholder image for lazyloading
      *
@@ -788,7 +830,8 @@ class ResponsiveImagesUtility implements SingletonInterface
         bool $inline = false,
         bool $absoluteUri = false,
         ?string $fileExtension = null,
-        ?int $quality = null
+        ?int $quality = null,
+        ?string $backgroundColor = null
     ): string {
         $cropArea = $cropArea ?: Area::createEmpty();
 
@@ -800,6 +843,7 @@ class ResponsiveImagesUtility implements SingletonInterface
             $processingInstructions['fileExtension'] = $fileExtension;
         }
         $this->addQualityToProcessingInstructions($processingInstructions, $quality);
+        $this->addBackgroundColorToProcessingInstructions($processingInstructions, $backgroundColor);
         $processedImage = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
 
         // Disable inline placeholder if the image is not processed at all

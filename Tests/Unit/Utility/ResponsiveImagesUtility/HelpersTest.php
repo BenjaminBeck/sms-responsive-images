@@ -297,6 +297,29 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
         $this->assertSame('-strip -quality 100', $processingInstructions['additionalParameters']);
     }
 
+    #[Test]
+    public function addsBackgroundColorToProcessingInstructions(): void
+    {
+        $processingInstructions = ['additionalParameters' => '-strip'];
+
+        $this->utility->addBackgroundColorToProcessingInstructions($processingInstructions, 'white');
+
+        $this->assertSame(
+            "-strip -background 'white' -alpha remove -alpha off",
+            $processingInstructions['additionalParameters']
+        );
+    }
+
+    #[Test]
+    public function ignoresUnsafeBackgroundColor(): void
+    {
+        $processingInstructions = ['additionalParameters' => '-strip'];
+
+        $this->utility->addBackgroundColorToProcessingInstructions($processingInstructions, 'white; rm -rf /');
+
+        $this->assertSame('-strip', $processingInstructions['additionalParameters']);
+    }
+
     public static function generatePlaceholderImageProvider()
     {
         return [
