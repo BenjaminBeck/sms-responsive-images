@@ -4,6 +4,8 @@ namespace Sitegeist\ResponsiveImages\Tests\Unit\Utility\ResponsiveImagesUtility;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Sitegeist\ResponsiveImages\Utility\ResponsiveImagesUtility;
+use TYPO3\CMS\Extbase\Service\ImageService;
 use TYPO3Fluid\Fluid\Core\ViewHelper\TagBuilder;
 use TYPO3\CMS\Core\Imaging\ImageManipulation\Area;
 
@@ -246,6 +248,43 @@ class HelpersTest extends AbstractResponsiveImagesUtilityTestCase
             )
         );
         $this->assertEquals(['width' => 400, 'height' => 400], $largestDimensions);
+    }
+
+    #[Test]
+    public function generatesSmallerSrcsetImagesFromLargerProcessedImages(): void
+    {
+        $sourceWidths = [];
+        $test = $this;
+
+        $imageService = $this->createStub(ImageService::class);
+        $imageService
+            ->method('applyProcessingInstructions')
+            ->willReturnCallback(static function ($file, $instructions) use (&$sourceWidths, $test) {
+                $sourceWidths[] = $file->getProperty('width');
+                $width = min($instructions['width'], $file->getProperty('width'));
+
+                return $test->mockFileObject([
+                    'width' => $width,
+                    'height' => $width,
+                    'extension' => $file->getProperty('extension'),
+                ], true);
+            });
+        $imageService
+            ->method('getImageUri')
+            ->willReturnCallback(static fn($file) => '/image-' . $file->getProperty('width') . '.jpg');
+
+        $utility = new ResponsiveImagesUtility($imageService);
+        $originalImage = $this->mockFileObject(['width' => 1000, 'height' => 1000, 'extension' => 'jpg']);
+
+        $this->assertSame(
+            [
+                '200w' => '/image-200.jpg',
+                '400w' => '/image-400.jpg',
+                '800w' => '/image-800.jpg',
+            ],
+            $utility->generateSrcsetImages($originalImage, 800, [200, 400, 800])
+        );
+        $this->assertSame([1000, 800, 400], $sourceWidths);
     }
 
     #[Test]

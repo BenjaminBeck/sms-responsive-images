@@ -674,8 +674,8 @@ class ResponsiveImagesUtility implements SingletonInterface
             $srcset = GeneralUtility::trimExplode(',', (string) $srcset);
         }
 
-        $images = [];
-        foreach ($srcset as $widthDescriptor) {
+        $candidates = [];
+        foreach ($srcset as $index => $widthDescriptor) {
             $widthDescriptor = (string) $widthDescriptor;
             // Determine image width
             $srcsetMode = substr($widthDescriptor, -1);
@@ -694,22 +694,41 @@ class ResponsiveImagesUtility implements SingletonInterface
                     $widthDescriptor = $candidateWidth . 'w';
             }
 
+            $candidates[] = [
+                'index' => $index,
+                'candidateWidth' => $candidateWidth,
+                'srcsetMode' => $srcsetMode,
+                'widthDescriptor' => $widthDescriptor,
+            ];
+        }
+
+        $processingQueue = $candidates;
+        usort(
+            $processingQueue,
+            static fn(array $left, array $right) => $right['candidateWidth'] <=> $left['candidateWidth']
+        );
+
+        $processedImages = [];
+        $sourceImage = $image;
+        $sourceCropArea = $cropArea;
+        foreach ($processingQueue as $candidate) {
             // Generate image
             $processingInstructions = [
-                'width' => $candidateWidth,
-                'crop' => $cropArea->isEmpty() ? null : $cropArea->makeAbsoluteBasedOnFile($image),
+                'width' => $candidate['candidateWidth'],
+                'crop' => $sourceCropArea->isEmpty() ? null : $sourceCropArea->makeAbsoluteBasedOnFile($sourceImage),
             ];
             if (!empty($fileExtension)) {
                 $processingInstructions['fileExtension'] = $fileExtension;
             }
             $this->addQualityToProcessingInstructions($processingInstructions, $quality);
-            $processedImage = $this->imageService->applyProcessingInstructions($image, $processingInstructions);
+            $processedImage = $this->imageService->applyProcessingInstructions($sourceImage, $processingInstructions);
 
             // If processed file isn't as wide as it should be ([GFX][processor_allowUpscaling] set to false)
             // then use final width of the image as widthDescriptor if not input case 3 is used
             $processedWidth = $processedImage->getProperty('width');
             $processedHeight = $processedImage->getProperty('height');
-            if ($srcsetMode === 'w' && $processedWidth !== $candidateWidth) {
+            $widthDescriptor = $candidate['widthDescriptor'];
+            if ($candidate['srcsetMode'] === 'w' && $processedWidth !== $candidate['candidateWidth']) {
                 $widthDescriptor = $processedWidth . 'w';
             }
             $isLargestProcessedWidth = is_array($largestDimensions)
@@ -721,7 +740,19 @@ class ResponsiveImagesUtility implements SingletonInterface
                 ];
             }
 
-            $images[$widthDescriptor] = $this->imageService->getImageUri($processedImage, $absoluteUri);
+            $processedImages[$candidate['index']] = [
+                'widthDescriptor' => $widthDescriptor,
+                'uri' => $this->imageService->getImageUri($processedImage, $absoluteUri),
+            ];
+
+            $sourceImage = $processedImage;
+            $sourceCropArea = Area::createEmpty();
+        }
+
+        ksort($processedImages);
+        $images = [];
+        foreach ($processedImages as $processedImage) {
+            $images[$processedImage['widthDescriptor']] = $processedImage['uri'];
         }
 
         return $images;
