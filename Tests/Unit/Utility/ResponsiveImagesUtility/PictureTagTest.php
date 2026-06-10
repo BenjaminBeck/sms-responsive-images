@@ -4,6 +4,8 @@ namespace Sitegeist\ResponsiveImages\Tests\Unit\Utility\ResponsiveImagesUtility;
 
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
+use Sitegeist\ResponsiveImages\Utility\ResponsiveImagesUtility;
+use TYPO3\CMS\Extbase\Service\ImageService;
 use TYPO3\CMS\Core\Package\PackageManager;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3Fluid\Fluid\Core\ViewHelper\TagBuilder;
@@ -219,6 +221,95 @@ class PictureTagTest extends AbstractResponsiveImagesUtilityTestCase
         );
         $this->assertEquals($tagName, $tag->getTagName());
         $this->assertEquals(implode('', $tagContent), $tag->getContent());
+    }
+
+    #[Test]
+    public function createPictureTagProcessesEveryCroppedSrcsetCandidateFromOriginalImage(): void
+    {
+        $originalImage = $this->mockFileObject([
+            'width' => 5530,
+            'height' => 3687,
+            'extension' => 'jpg',
+            'mimeType' => 'image/jpeg',
+        ]);
+        $fallbackImage = $this->mockFileObject([
+            'width' => 1501,
+            'height' => 1501,
+            'extension' => 'jpg',
+            'mimeType' => 'image/jpeg',
+        ]);
+        $cropVariantCollection = new CropVariantCollection([
+            new CropVariant(
+                'slider_preview',
+                'Slider preview',
+                new Area(0.15313550458044037, 0.0, 0.6617289908391193, 0.992503748125937)
+            ),
+        ]);
+        $processedCalls = [];
+        $imageService = $this->createStub(ImageService::class);
+        $imageService
+            ->method('applyProcessingInstructions')
+            ->willReturnCallback(function ($file, array $instructions) use (&$processedCalls) {
+                $processedCalls[] = [
+                    'file' => $file,
+                    'instructions' => $instructions,
+                ];
+
+                return $this->mockFileObject([
+                    'name' => 'image',
+                    'width' => min((int)$instructions['width'], 2000),
+                    'height' => min((int)$instructions['width'], 2000),
+                    'extension' => $instructions['fileExtension'] ?? 'jpg',
+                    'mimeType' => 'image/' . ($instructions['fileExtension'] ?? 'jpeg'),
+                ], true);
+            });
+        $imageService
+            ->method('getImageUri')
+            ->willReturnCallback(static fn($file, bool $absolute): string => '/image-' . $file->getProperty('width') . '.' . $file->getProperty('extension'));
+
+        $utility = new ResponsiveImagesUtility($imageService);
+        $utility->createPictureTag(
+            $originalImage,
+            $fallbackImage,
+            [
+                [
+                    'cropVariant' => 'slider_preview',
+                    'srcset' => [235, 470, 960, 1200, 1600, 2000],
+                ],
+            ],
+            $cropVariantCollection,
+            null,
+            null,
+            null,
+            false,
+            false,
+            'svg',
+            0,
+            false,
+            'avif'
+        );
+
+        $this->assertCount(6, $processedCalls);
+        $expectedCrop = [
+            'x' => 846.8393403298352,
+            'y' => 0.0,
+            'width' => 3659.36131934033,
+            'height' => 3659.36131934033,
+        ];
+        foreach ($processedCalls as $processedCall) {
+            $this->assertSame($originalImage, $processedCall['file']);
+            $this->assertArrayHasKey('crop', $processedCall['instructions']);
+            $this->assertNotNull($processedCall['instructions']['crop']);
+            $actualCrop = new \ReflectionClass($processedCall['instructions']['crop']);
+            foreach ($expectedCrop as $property => $expectedValue) {
+                $actualCropProperty = $actualCrop->getProperty($property);
+                $this->assertEqualsWithDelta(
+                    $expectedValue,
+                    $actualCropProperty->getValue($processedCall['instructions']['crop']),
+                    0.000001
+                );
+            }
+        }
     }
 
     public static function createPictureTagWithCustomTagProvider()

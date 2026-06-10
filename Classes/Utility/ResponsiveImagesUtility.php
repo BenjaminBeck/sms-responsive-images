@@ -734,6 +734,7 @@ class ResponsiveImagesUtility implements SingletonInterface
         $processedImages = [];
         $sourceImage = $image;
         $sourceCropArea = $cropArea;
+        $canReuseProcessedSource = $cropArea->isEmpty();
         foreach ($processingQueue as $candidate) {
             // Generate image
             $processingInstructions = [
@@ -769,8 +770,10 @@ class ResponsiveImagesUtility implements SingletonInterface
                 'uri' => $this->imageService->getImageUri($processedImage, $absoluteUri),
             ];
 
-            $sourceImage = $processedImage;
-            $sourceCropArea = Area::createEmpty();
+            if ($canReuseProcessedSource) {
+                $sourceImage = $processedImage;
+                $sourceCropArea = Area::createEmpty();
+            }
         }
 
         ksort($processedImages);
